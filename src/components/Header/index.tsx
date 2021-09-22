@@ -24,7 +24,9 @@ const Header = () => {
       <ContainerLeft>
         <HeaderLink>
           <Link href='#'>
-            <Logo>Emazon books</Logo>
+            <Logo>
+              Emazon books
+            </Logo>
           </Link>
         </HeaderLink>
       </ContainerLeft>

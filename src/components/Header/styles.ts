@@ -6,6 +6,7 @@ export const Container = styled.nav`
   align-items: center;
   background-color:  ${({ theme }) => theme.default.colors.darkBlue};
   height: 60px;
+  width: 100%;
 `
 
 export const ContainerLeft = styled.div`
@@ -49,8 +50,9 @@ export const HeaderLink = styled.div`
 export const Logo = styled.span`
   color: white;
   font-weight: bold;
-  font-size: 20px;
+  font-size: 23px;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI';
+  border-bottom: 5px ridge ${props => props.theme.default.colors.gold};
 `
 
 export const InputSearch = styled.div`

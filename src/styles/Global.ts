@@ -14,7 +14,12 @@ export const GlobalStyle = createGlobalStyle`
     text-decoration: none;
   }
 
+  ul, li {
+    list-style-type: none;
+  }
+  
   * {
     box-sizing: border-box;
   }
+  
 `

@@ -52,6 +52,7 @@ export const Stars = styled.div`
 
 export const CommentAmount = styled.div`
   margin-left: 5px;
+  font-size: 14px;
   color: ${props => props.theme.default.colors.textBlue};
 `
 

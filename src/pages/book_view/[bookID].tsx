@@ -50,13 +50,15 @@ export async function getStaticProps (context) {
 
   const book = await response.json()
   // eslint-disable-next-line camelcase
-  const { pages_amount, type_cover, ...rest } = book
+  const { pages_amount, type_cover, published_at, publishing_company, ...rest } = book
   const bookFixCamelCase = {
     ...rest,
     pagesAmount: book.pages_amount,
     typeCover: {
       typeName: book.type_cover.type_name
-    }
+    },
+    publishedAt: book.published_at,
+    publishingCompany: book.publishing_company
   }
 
   return {

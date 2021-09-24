@@ -8,28 +8,32 @@ import {
 } from './styles'
 
 export type Book = {
-    id: number
-    title: string
-    price: number
-    discount: number
-    description: string
-    pagesAmount: number
-    heigh: number,
-    width: number,
-    thickness: number,
-    author: {
-        name: string
-    },
-    typeCover: {
-        typeName: string
-    },
-    language: {
-        code: string
-        name: string
-    },
-    category: {
-        name: string
-    }
+  id: number
+  title: string
+  price: number
+  discount: number
+  description: string
+  pagesAmount: number
+  heigh: number,
+  width: number,
+  thickness: number,
+  publishedAt: Date,
+  publishingCompany: {
+    name: string
+  },
+  author: {
+      name: string
+  },
+  typeCover: {
+      typeName: string
+  },
+  language: {
+      code: string
+      name: string
+  },
+  category: {
+      name: string
+  }
 }
 
 type Props = {
@@ -57,15 +61,19 @@ export async function getStaticProps (context) {
   })
 
   const books = await response.json()
+  console.log(books)
+
   const fixCamelCase = books.map(book => {
     // eslint-disable-next-line camelcase
-    const { pages_amount, type_cover, ...rest } = book
+    const { pages_amount, type_cover, published_at, publishing_company, ...rest } = book
     const bookFixCamelCase = {
       ...rest,
       pagesAmount: book.pages_amount,
       typeCover: {
         typeName: book.type_cover.type_name
-      }
+      },
+      publishedAt: book.published_at,
+      publishingCompany: book.publishing_company
     }
     return bookFixCamelCase
   })

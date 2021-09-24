@@ -1,1 +1,1 @@
-export const ENDPOINT_API = 'http://localhost:8000/api'
+export const makeEndpointAPI = (rest: string) => `http://localhost:8000/api/${rest}`

@@ -1,9 +1,8 @@
 import styled from 'styled-components'
 
-export const Container = styled.div`
+export const Container = styled.li`
   width: 268px; 
   margin: 5px 5px 10px 5px;
-
 `
 
 export const BorderTop = styled.div`
@@ -13,6 +12,7 @@ export const BorderTop = styled.div`
 `
 
 export const ImgBook = styled.div`
+  cursor: pointer;
 `
 
 export const Title = styled.div`
@@ -21,6 +21,11 @@ export const Title = styled.div`
   font-family: inherit;
   font-size: 14px;
   font-weight: 400;
+  cursor: pointer;
+
+  &:hover {
+    color: ${props => props.theme.default.colors.yellowAlt};
+  }
 `
 
 export const Edition = styled.div`

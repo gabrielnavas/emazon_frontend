@@ -1,6 +1,6 @@
 import Header from '../../components/Header'
 import Item from '../../components/pages/shop/BookItem'
-import { ENDPOINT_API } from '../../config/api'
+import { makeEndpointAPI } from '../../config/api'
 
 import {
   Container,
@@ -41,16 +41,14 @@ const ShopPage = ({ books }: Props) => {
     <Container>
       <Header />
       <BookList>
-        {
-          books.map(book => <Item key={book.id} book={book} />)
-        }
+        { books.map(book => <Item key={book.id} book={book} />) }
       </BookList>
     </Container>
   )
 }
 
 export async function getStaticProps (context) {
-  const response = await fetch(`${ENDPOINT_API}/books`, {
+  const response = await fetch(makeEndpointAPI('books'), {
     method: 'GET',
     headers: {
       Accept: 'application/json',
@@ -59,14 +57,18 @@ export async function getStaticProps (context) {
   })
 
   const books = await response.json()
-  const fixCamelCase = books.map(book => ({
-    ...book,
-    pagesAmount: book.pages_amount,
-    typeCover: {
-      typeName: book.type_cover.type_name
+  const fixCamelCase = books.map(book => {
+    // eslint-disable-next-line camelcase
+    const { pages_amount, type_cover, ...rest } = book
+    const bookFixCamelCase = {
+      ...rest,
+      pagesAmount: book.pages_amount,
+      typeCover: {
+        typeName: book.type_cover.type_name
+      }
     }
-  }) as Book)
-
+    return bookFixCamelCase
+  })
   return {
     props: { books: fixCamelCase }
   }

@@ -1,5 +1,7 @@
 import Image from 'next/image'
+import Link from 'next/link'
 import { useEffect, useState } from 'react'
+import * as pathRoutes from '../../../../config/routesPath'
 
 import {
   IconStarFill,
@@ -32,27 +34,6 @@ import {
 type Props = {
   book: Book
 }
-const makePriceWithDiscount = (price: number, discount: number): string[] => {
-  const priceWithDiscount = price * (1 - discount)
-  const splited = priceWithDiscount.toString().split('.')
-  if (splited.length === 1) {
-    return [splited[0], '0']
-  }
-  return splited
-}
-
-const makeWhole = (price: number, discount: number): number => {
-  const whole = makePriceWithDiscount(price, discount)[0]
-  return parseInt(whole)
-}
-
-const makeFraction = (price: number, discount: number): number => {
-  const fraction = makePriceWithDiscount(price, discount)[1]
-  return parseInt(fraction)
-}
-
-const capitalize = (str: string) =>
-  `${str[0].toUpperCase()}${str.substring(1, str.length)}`
 
 const Item = ({ book }: Props) => {
   const [price, setPrice] = useState('')
@@ -61,40 +42,30 @@ const Item = ({ book }: Props) => {
 
   useEffect(() => {
     const fraction = makeFraction(book.price, book.discount)
-    if (fraction < 10) {
-      const fractionWithLeftZero = `0${fraction}`
-      setFraction(fractionWithLeftZero)
-    } else {
-      setFraction(fraction.toString())
-    }
+    setFraction(fraction)
   }, [])
 
   useEffect(() => {
     const whole = makeWhole(book.price, book.discount)
-    setPrice(whole.toString())
+    setPrice(whole)
   }, [])
 
   useEffect(() => {
-    const priceSplited = book.price.toString().split('.')
-    if (priceSplited.length === 1) {
-      setRealPrice(`R$${priceSplited[0]},00`)
-    } else if (priceSplited.length === 2) {
-      const fraction = Number(priceSplited[1])
-      if (fraction < 10) {
-        setRealPrice(`R$${priceSplited[0]},0${priceSplited[1]}`)
-      } else {
-        setRealPrice(`R$${priceSplited[0]},${priceSplited[1]}`)
-      }
-    }
+    const realPrice = makeRealPrice(book.price)
+    setRealPrice(realPrice)
   }, [])
 
   return (
     <Container>
       <BorderTop />
-      <ImgBook>
-        <Image src='/img_book1.jpg' width={183} height={268} />
-      </ImgBook>
-      <Title>{book.title}</Title>
+      <Link href={pathRoutes.getBookViewPath(book.id)}>
+        <ImgBook>
+            <Image src='/img_book1.jpg' width={183} height={268} />
+        </ImgBook>
+      </Link >
+      <Link href={pathRoutes.getBookViewPath(book.id)}>
+        <Title>{book.title}</Title>
+      </Link>
       <Edition>
         <Language>{book.language.name}</Language>
         <Author>Por {book.author.name}</Author>
@@ -119,5 +90,50 @@ const Item = ({ book }: Props) => {
     </Container>
   )
 }
+
+const makePriceWithDiscount = (price: number, discount: number): string[] => {
+  const priceWithDiscount = price * (1 - discount)
+  const splited = priceWithDiscount.toString().split('.')
+  if (splited.length === 1) {
+    return [splited[0], '0']
+  }
+  return splited
+}
+
+const makeWhole = (price: number, discount: number): string => {
+  const priceSplited = makePriceWithDiscount(price, discount)
+  const whole = priceSplited[0]
+  return whole
+}
+
+const makeFraction = (price: number, discount: number): string => {
+  const fractionSplited = makePriceWithDiscount(price, discount)
+  const fraction = parseInt(fractionSplited[1])
+  if (fraction < 10) {
+    const fractionWithLeftZero = `0${fraction}`
+    return fractionWithLeftZero
+  }
+  return fraction.toString()
+}
+
+const makeRealPrice = (realPrice: number): string => {
+  const priceSplited = realPrice.toString().split('.')
+  if (priceSplited.length === 1) {
+    const priceWithTwoZeros = `R$${priceSplited[0]},00`
+    return priceWithTwoZeros
+  } else if (priceSplited.length === 2) {
+    const fraction = Number(priceSplited[1])
+    if (fraction < 10) {
+      const priceWithOneLeftZero = `R$${priceSplited[0]},0${priceSplited[1]}`
+      return priceWithOneLeftZero
+    } else {
+      const defaultValue = `R$${priceSplited[0]},${priceSplited[1]}`
+      return defaultValue
+    }
+  }
+}
+
+const capitalize = (str: string) =>
+  `${str[0].toUpperCase()}${str.substring(1, str.length)}`
 
 export default Item

@@ -1,5 +1,8 @@
 import Link from 'next/link'
 
+import { IconSearch, IconCart } from '../../icons'
+import { getShopPath } from '../../config/routesPath'
+
 import {
   Container,
   ContainerLeft,
@@ -16,14 +19,12 @@ import {
   AmountBooks
 } from './styles'
 
-import { IconSearch, IconCart } from '../../icons'
-
 const Header = () => {
   return (
     <Container>
       <ContainerLeft>
         <HeaderLink>
-          <Link href='#'>
+          <Link href={getShopPath()}>
             <Logo>
               Emazon books
             </Logo>

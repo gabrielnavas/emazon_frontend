@@ -113,7 +113,10 @@ const makeFraction = (price: number, discount: number): string => {
     const fractionWithLeftZero = `0${fraction}`
     return fractionWithLeftZero
   }
-  return fraction.toString()
+  const fractionDefault = fraction.toString()
+  return fractionDefault.length <= 2
+    ? fractionDefault
+    : fractionDefault.substr(0, 2)
 }
 
 const makeRealPrice = (realPrice: number): string => {

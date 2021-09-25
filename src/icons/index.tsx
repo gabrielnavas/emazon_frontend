@@ -6,3 +6,5 @@ export {
   BsStarHalf as IconStarHalf,
   BsStar as IconStarEmpty
 } from 'react-icons/bs'
+
+export { BsInfo as IconInfoForm } from 'react-icons/bs'

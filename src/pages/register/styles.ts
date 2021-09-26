@@ -16,7 +16,7 @@ export const Logo = styled.span`
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI';
   border-bottom: 5px ridge ${props => props.theme.default.colors.gold};
   color: #333;
-  margin: 50px 0;
+  margin: 20px 0 35px 0;
 `
 
 export const Card = styled.section`

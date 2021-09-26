@@ -27,26 +27,15 @@ import {
 
 import { IconInfoForm } from '../../icons'
 
-import * as emailValidator from '../../utils/email'
-import { makeEndpointAPI } from '../../config/api'
-
-const GlobalFormError = 'globalFormError'
+import {
+  registerUseCaseFactory,
+  UsecaseError,
+  errorsTypes
+} from '../../usecase/pages/register'
 
 type FormInfoState = {
-  isError?: Boolean
+  isError?: boolean
   message?: string
-}
-
-type User = {
-  name: string
-  email: string
-  password: string
-  passwordConfirmation: string
-}
-
-type UsecaseResult = {
-  fieldName: string
-  message: string
 }
 
 const initFormInfoState = () => ({ isError: false, message: '' }) as FormInfoState
@@ -68,6 +57,8 @@ const RegisterPage = () => {
 
   const [isLoadingForm, setIsLoadingForm] = useState(false)
 
+  const registerUsecase = registerUseCaseFactory()
+
   useEffect(() => {
     setPasswordMsg({
       isError: false,
@@ -77,39 +68,29 @@ const RegisterPage = () => {
 
   const handleButtonFinish = useCallback(() => {
     setIsLoadingForm(true)
-    const payload = {
+    const payloadForm = {
       name, email, password, passwordConfirmation
     }
-    const result = loginValidationUseCase(payload)
-    if (result.length > 0) {
-      setErrorsFromValidation(result)
-      return
-    }
+    registerUsecase.handle(payloadForm)
+      .then(result => result.length > 0 && setErrorsFromValidation(result))
+  }, [isLoadingForm, name, email, password, passwordConfirmation])
 
-    (async () => {
-      try {
-        const response = await loginRequestUseCase(payload)
-        if (response.statusCode === 201) {
-          // move to login
-        }
-      } catch (e) {
-        setGlobalErrors([{ isError: true, message: 'Sem conexão, tente novamente mais tarde.' }])
-      }
-    })()
-  }, [loginValidationUseCase, globalErrors, isLoadingForm, name, email, password, passwordConfirmation])
-
-  const setErrorsFromValidation = useCallback((result: UsecaseResult[]) => {
-    for (const msg of result) {
-      switch (msg.fieldName) {
-        case 'name': setNameMsg({ isError: true, message: msg.message }); break
-        case 'email': setEmailMsg({ isError: true, message: msg.message }); break
-        case 'password': setPasswordMsg({ isError: true, message: msg.message }); break
-        case 'passwordConfirmation': setPasswordConfirmationMsg({ isError: true, message: msg.message }); break
-        case GlobalFormError: setGlobalErrors(old => [{ isError: true, message: msg.message }, ...old]); break
-      }
+  const setErrorsFromValidation = useCallback((results: UsecaseError[]) => {
+    const errors = {
+      [errorsTypes.NameError]: setNameMsg,
+      [errorsTypes.EmailError]: setEmailMsg,
+      [errorsTypes.PasswordError]: setPasswordMsg,
+      [errorsTypes.PasswordConfirmationError]: setPasswordConfirmationMsg
     }
+    results.forEach(result => {
+      const useStateGetted = errors[result.fieldName]
+      useStateGetted({ isError: true, message: result.message })
+      if (result.fieldName === errorsTypes.GlobalError) {
+        setGlobalErrors(old => [{ isError: true, message: result.message }, ...old])
+      }
+    })
     setIsLoadingForm(false)
-  }, [])
+  }, [errorsTypes])
 
   return (
     <Container>
@@ -212,50 +193,6 @@ export async function getStaticProps (context) {
   return {
     props: { }
   }
-}
-
-const loginValidationUseCase = (user: User) => {
-  const errors = [] as UsecaseResult[]
-
-  if (user.name.length <= 1 || user.name.length > 100) {
-    errors.push({ fieldName: 'name', message: 'Nome deve ter entre 2 e 100 caracteres' })
-  }
-
-  if (!emailValidator.validate(user.email)) {
-    errors.push({ fieldName: 'email', message: 'Email inválido' })
-  }
-
-  if (user.password.length < 6 || user.password.length > 100) {
-    errors.push({ fieldName: 'password', message: 'Senha deve ter 6 e 100 caracteres' })
-  }
-
-  if (user.passwordConfirmation.length < 6 || user.passwordConfirmation.length > 100) {
-    errors.push({
-      fieldName: 'passwordConfirmation',
-      message: 'Confirmação de Senha deve ter 6 e 100 caracteres'
-    })
-  }
-
-  if (user.password !== user.passwordConfirmation) {
-    errors.push({
-      fieldName: GlobalFormError,
-      message: 'Verificar senha e confirmacao de senha'
-    })
-  }
-
-  return errors
-}
-
-const loginRequestUseCase = async (user: User): Promise<{statusCode: number}> => {
-  const response = await fetch(makeEndpointAPI('register'), {
-    method: 'POST',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(user)
-  })
-  return { statusCode: response.status }
 }
 
 export default RegisterPage

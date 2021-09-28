@@ -1,4 +1,4 @@
-import * as emailValidator from '../../../utils/email'
+import * as emailValidator from '../../utils/email'
 import { UsecaseError, User } from './Entity'
 
 export const errorsTypes = {

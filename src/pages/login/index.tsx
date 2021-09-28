@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from 'react'
 import Link from 'next/link'
 import Router from 'next/router'
 
-import { getLoginPath, getShopPath } from '../../config/routesPath'
+import { getShopPath } from '../../config/routesPath'
 
 import {
   Container,
@@ -16,9 +16,7 @@ import {
   FormInfo,
   ButtonFinish,
   LegalText,
-  BarSeparateCard,
   BarSeparatePage,
-  LoginOption,
   FooterPage,
   FooterOptions,
   OptionLink,
@@ -29,10 +27,10 @@ import {
 import { IconInfoForm } from '../../icons'
 
 import {
-  registerUseCaseFactory,
+  loginUseCaseFactory,
   UsecaseError,
   errorsTypes
-} from '../../usecase/register'
+} from '../../usecase/login'
 
 type FormInfoState = {
   isError?: boolean
@@ -41,24 +39,18 @@ type FormInfoState = {
 
 const initFormInfoState = () => ({ isError: false, message: '' }) as FormInfoState
 
-const RegisterPage = () => {
-  const [name, setName] = useState('')
-  const [nameMsg, setNameMsg] = useState<FormInfoState>(initFormInfoState())
-
+const LoginPage = () => {
   const [email, setEmail] = useState('')
   const [emailMsg, setEmailMsg] = useState<FormInfoState>(initFormInfoState())
 
   const [password, setPassword] = useState('')
   const [passwordMsg, setPasswordMsg] = useState<FormInfoState>(initFormInfoState())
 
-  const [passwordConfirmation, setPasswordConfirmation] = useState('')
-  const [passwordConfirmationMsg, setPasswordConfirmationMsg] = useState<FormInfoState>(initFormInfoState())
-
   const [globalErrors, setGlobalErrors] = useState<FormInfoState[]>([])
 
   const [isLoadingForm, setIsLoadingForm] = useState(false)
 
-  const registerUsecase = registerUseCaseFactory()
+  const loginUsecase = loginUseCaseFactory()
 
   useEffect(() => {
     setPasswordMsg({
@@ -71,24 +63,21 @@ const RegisterPage = () => {
     (async () => {
       setIsLoadingForm(true)
       const payloadForm = {
-        name, email, password, passwordConfirmation
+        email, password
       }
-      const result = await registerUsecase.handle(payloadForm)
+      const result = await loginUsecase.handle(payloadForm)
       setIsLoadingForm(false)
       if (result.length > 0) {
         setErrorsFromValidation(result)
-        return
       }
-      Router.push(getLoginPath())
+      Router.push(getShopPath())
     })()
-  }, [isLoadingForm, name, email, password, passwordConfirmation])
+  }, [isLoadingForm, email, password])
 
   const setErrorsFromValidation = useCallback((results: UsecaseError[]) => {
     const errors = {
-      [errorsTypes.NameError]: setNameMsg,
       [errorsTypes.EmailError]: setEmailMsg,
-      [errorsTypes.PasswordError]: setPasswordMsg,
-      [errorsTypes.PasswordConfirmationError]: setPasswordConfirmationMsg
+      [errorsTypes.PasswordError]: setPasswordMsg
     }
     results.forEach(result => {
       const useStateGetted = errors[result.fieldName]
@@ -108,20 +97,9 @@ const RegisterPage = () => {
       </Logo>
       <Card>
         <Form>
-          <Title>Criar conta</Title>
+          <Title>Fazer login</Title>
           <FormGroup>
-            <Label>Seu nome</Label>
-            <InputText isError={nameMsg.isError} value={name} onChange={e => setName(e.target.value)} />
-            {
-              nameMsg.message.length > 0 &&
-                <FormInfo isError={nameMsg.isError} >
-                  <IconInfoForm />
-                  {nameMsg.message}
-                </FormInfo>
-            }
-          </FormGroup>
-          <FormGroup>
-            <Label>Seu email</Label>
+            <Label>Email</Label>
             <InputText isError={emailMsg.isError} value={email} onChange={e => setEmail(e.target.value)} />
             {
               emailMsg.message.length > 0 &&
@@ -141,18 +119,7 @@ const RegisterPage = () => {
                   {passwordMsg.message}
                 </FormInfo>
             }
-          </FormGroup>
-          <FormGroup>
-            <Label>Insira a senha nova mais uma vez</Label>
-            <InputText isError={nameMsg.isError} type='password' value={passwordConfirmation} onChange={e => setPasswordConfirmation(e.target.value)} />
-            {
-              passwordConfirmationMsg.message.length > 0 &&
-                <FormInfo isError={passwordConfirmationMsg.isError}>
-                  <IconInfoForm />
-                  {passwordConfirmationMsg.message}
-                </FormInfo>
-            }
-          <GlobalErrors>
+            <GlobalErrors>
             {
               globalErrors.map((error, index) => (
                   <FormInfo key={index} isError={error.isError}>
@@ -166,17 +133,12 @@ const RegisterPage = () => {
           <ButtonFinish
             disabled={isLoadingForm}
             onClick={e => { e.preventDefault(); handleButtonFinish() }}>
-            {isLoadingForm ? 'Aguarde' : 'Cadastrar'}
+            {isLoadingForm ? 'Aguarde' : 'Logar'}
           </ButtonFinish>
         </Form>
         <LegalText>
-          Ao criar uma conta, você concorda com as <span><Link href='#'>Condições de Uso da Emazon.</Link></span>
+          Ao continuar, você concorda com as  <span><Link href='#'>Condições de Uso da Emazon.</Link></span>
         </LegalText>
-        <BarSeparateCard />
-        <LoginOption>
-          <span>Você já tem uma conta?</span>
-          <span> <Link href='#'>Fazer login</Link></span>
-        </LoginOption>
       </Card>
       <BarSeparatePage />
       <FooterPage>
@@ -202,4 +164,4 @@ export async function getStaticProps (context) {
   }
 }
 
-export default RegisterPage
+export default LoginPage

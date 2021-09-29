@@ -27,7 +27,6 @@ export class HttpRequest {
       },
       body: JSON.stringify(payload)
     })
-    console.log(await response.json(), response.status)
 
     return {
       statusCode: response.status

@@ -8,3 +8,7 @@ export {
 } from 'react-icons/bs'
 
 export { BsInfo as IconInfoForm } from 'react-icons/bs'
+export {
+  CgArrowLongLeft as IconArrowLeftPagination,
+  CgArrowLongRight as IconArrowRightPagination
+} from 'react-icons/cg'

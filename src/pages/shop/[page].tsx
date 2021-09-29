@@ -2,12 +2,14 @@ import { GetStaticPaths, GetStaticProps } from 'next'
 
 import Header from '../../components/Header'
 import Item from '../../components/pages/shop/BookItem'
+import Navigation from '../../components/pages/shop/Navigation'
 
 import {
   Container,
   BookList
 } from './styles'
 import { makeEndpointAPI } from '../../config/api'
+import { useRouter } from 'next/router'
 
 export type Book = {
   id: number
@@ -39,16 +41,21 @@ export type Book = {
 }
 
 type Props = {
-  books: Book[]
+  books: Book[],
+  limitPage: number
 }
 
-const ShopPage = ({ books }: Props) => {
+const ShopPage = ({ books, limitPage }: Props) => {
+  const router = useRouter()
+  const { page } = router.query
+
   return (
     <Container>
       <Header />
       <BookList>
         { books.map(book => <Item key={book.id} book={book} />) }
       </BookList>
+      <Navigation currectPage={Number(page)} limit={limitPage} primaryPage={0} />
     </Container>
   )
 }
@@ -97,8 +104,12 @@ export const getStaticProps: GetStaticProps = async context => {
     }
     return bookFixCamelCase
   })
+
   return {
-    props: { books: fixCamelCase }
+    props: {
+      books: fixCamelCase,
+      limitPage: data.limit_page
+    }
   }
 }
 

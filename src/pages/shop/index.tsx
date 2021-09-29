@@ -11,6 +11,7 @@ import {
   BookList
 } from './styles'
 import { getLoginPath } from '../../config/routesPath'
+import { makeEndpointAPI } from '../../config/api'
 
 export type Book = {
   id: number
@@ -46,13 +47,6 @@ type Props = {
 }
 
 const ShopPage = ({ books }: Props) => {
-  useEffect(() => {
-    const tokenManager = new TokenManager()
-    if (!tokenManager.isLogged()) {
-      Router.replace(getLoginPath())
-    }
-  }, [TokenManager, Router, getLoginPath])
-
   return (
     <Container>
       <Header />
@@ -64,13 +58,15 @@ const ShopPage = ({ books }: Props) => {
 }
 
 export async function getStaticProps (context) {
-  // const response = await fetch(makeEndpointAPI('books'), {
-  //   method: 'GET',
-  //   headers: {
-  //     Accept: 'application/json',
-  //     'Content-Type': 'application/json'
-  //   }
-  // })
+  const response = await fetch(makeEndpointAPI('books'), {
+    method: 'GET',
+    headers: {
+      Accept: 'application/json',
+      'Content-Type': 'application/json'
+    }
+  })
+  const data = await response.json()
+  console.log(data)
 
   // const books = await response.json()
   // console.log(books)

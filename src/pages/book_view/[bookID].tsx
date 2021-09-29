@@ -9,7 +9,7 @@ import {
   IconStarEmpty
 } from '../../icons'
 import * as date from '../../utils/date'
-import { Book } from '../shop'
+import { Book } from '../shop/[page]'
 
 import {
   Container,
@@ -98,7 +98,7 @@ const BookViewPage = ({ book }: Props) => {
 }
 
 export async function getStaticPaths () {
-  const response = await fetch(makeEndpointAPI('books?get_ids=true'), {
+  const response = await fetch(makeEndpointAPI('shop/books/get_ids'), {
     method: 'GET',
     headers: {
       Accept: 'application/json',
@@ -106,8 +106,8 @@ export async function getStaticPaths () {
     }
   })
 
-  const bookIDs = await response.json()
-  const params = bookIDs.map((id: number) => ({ params: { bookID: `${id}` } }))
+  const data = await response.json()
+  const params = data.books.map(id => ({ params: { bookID: `${id}` } }))
 
   return {
     paths: [...params],
@@ -118,7 +118,7 @@ export async function getStaticPaths () {
 export async function getStaticProps (context) {
   const { bookID } = context.params
 
-  const response = await fetch(makeEndpointAPI(`books/${bookID}`), {
+  const response = await fetch(makeEndpointAPI(`shop/book/${bookID}`), {
     method: 'GET',
     headers: {
       Accept: 'application/json',
@@ -126,17 +126,17 @@ export async function getStaticProps (context) {
     }
   })
 
-  const book = await response.json()
+  const data = await response.json()
   // eslint-disable-next-line camelcase
-  const { pages_amount, type_cover, published_at, publishing_company, ...rest } = book
+  const { pages_amount, type_cover, published_at, publishing_company, ...rest } = data.book
   const bookFixCamelCase = {
     ...rest,
-    pagesAmount: book.pages_amount,
+    pagesAmount: data.book.pages_amount,
     typeCover: {
-      typeName: book.type_cover.type_name
+      typeName: data.book.type_cover.type_name
     },
-    publishedAt: book.published_at,
-    publishingCompany: book.publishing_company
+    publishedAt: data.book.published_at,
+    publishingCompany: data.book.publishing_company
   }
 
   return {

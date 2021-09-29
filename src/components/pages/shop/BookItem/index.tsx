@@ -8,7 +8,7 @@ import {
   IconStarHalf,
   IconStarEmpty
 } from '../../../../icons'
-import { Book } from '../../../../pages/shop'
+import { Book } from '../../../../pages/shop/[page]'
 
 import {
   Container,

@@ -24,7 +24,7 @@ const Header = () => {
     <Container>
       <ContainerLeft>
         <HeaderLink>
-          <Link href={getShopPath()}>
+          <Link href={getShopPath('0')}>
             <Logo>
               Emazon books
             </Logo>

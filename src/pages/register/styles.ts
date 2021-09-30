@@ -175,7 +175,7 @@ export const BarSeparatePage = styled.div`
   margin: 40px 0 10px 0;
   background: linear-gradient(to bottom,rgba(0,0,0,.14),rgba(0,0,0,.03) 3px,transparent);
   color: #111;
-  `
+`
 
 export const FooterPage = styled.footer`
   display: flex;

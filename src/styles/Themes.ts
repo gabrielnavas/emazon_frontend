@@ -4,6 +4,7 @@ export const themes = {
       darkBlue: '#131921',
       blue: '#399dc7',
       blueAlt: '#0066c0',
+      blueLight: '#38a2ff',
       yellow: '#febd69',
       yellowAlt: '#d99b4c',
       gold: '#ffa41c',

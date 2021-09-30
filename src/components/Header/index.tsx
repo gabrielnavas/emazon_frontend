@@ -1,7 +1,12 @@
 import Link from 'next/link'
 
 import { IconSearch, IconCart } from '../../icons'
-import { getLoginPath, getShopPath } from '../../config/routesPath'
+import {
+  getAccountConfigsPath,
+  getLoginPath,
+  getShopPath
+}
+  from '../../config/routesPath'
 
 import {
   Container,
@@ -57,7 +62,7 @@ const Header = () => {
       </ContainerFill>
       <ContainerRight>
       <HeaderLink>
-        <Link href={isLogged ? 'Não tem conta?' : getLoginPath()}>
+        <Link href={isLogged ? getAccountConfigsPath() : getLoginPath()}>
           <Profile>
             <span>
               Olá, {isLogged ? userFirstName : 'faça seu login'}

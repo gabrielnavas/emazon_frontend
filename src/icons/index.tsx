@@ -12,3 +12,8 @@ export {
   CgArrowLongLeft as IconArrowLeftPagination,
   CgArrowLongRight as IconArrowRightPagination
 } from 'react-icons/cg'
+
+export { GoPackage as IconPackage } from 'react-icons/go'
+export { MdSecurity as IconSecurity } from 'react-icons/md'
+export { FaRegAddressBook as IconAddress } from 'react-icons/fa'
+export { GiSellCard as IconSeller } from 'react-icons/gi'

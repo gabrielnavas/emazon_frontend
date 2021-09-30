@@ -55,7 +55,7 @@ const ShopPage = ({ books, limitPage }: Props) => {
       <BookList>
         { books.map(book => <Item key={book.id} book={book} />) }
       </BookList>
-      <Navigation currectPage={Number(page)} limit={limitPage} primaryPage={0} />
+      <Navigation currectPage={Number(page)} limit={limitPage} />
     </Container>
   )
 }

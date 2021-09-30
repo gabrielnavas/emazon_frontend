@@ -4,14 +4,18 @@ import { User } from './Entity'
 type HttpResponse = {
   statusCode: number
   data: {
-    token: string
+    token: string,
+    user: {
+      fullName: string
+      email: string
+    }
   }
 }
 
 export class HttpRequest {
   private readonly urlPost: string
   constructor () {
-    const loginSlug = 'users/token'
+    const loginSlug = 'login'
     this.urlPost = makeEndpointAPI(loginSlug)
   }
 
@@ -32,7 +36,11 @@ export class HttpRequest {
     return {
       statusCode: response.status,
       data: {
-        token: data.token
+        token: data.token,
+        user: {
+          fullName: data.user.full_name,
+          email: data.user.email
+        }
       }
     }
   }

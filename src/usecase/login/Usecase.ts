@@ -17,6 +17,8 @@ export class LoginUserUsecase {
     }
     const response = await this.httpRequest.handle(user)
     if (response.statusCode === 201) {
+      // TODO
+      // change to authManager and persistence full name and email from backend
       this.tokenManager.set(response.data.token)
     }
     return []

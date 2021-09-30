@@ -8,7 +8,7 @@ type HttpResponse = {
 export class HttpRequest {
   private readonly urlPost: string
   constructor () {
-    const registerSlug = 'users'
+    const registerSlug = 'register'
     this.urlPost = makeEndpointAPI(registerSlug)
   }
 

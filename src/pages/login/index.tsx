@@ -32,6 +32,8 @@ import {
   errorsTypes
 } from '../../usecase/login'
 
+const INITIAL_PAGE_SHOP_PARAM = '0'
+
 type FormInfoState = {
   isError?: boolean
   message?: string
@@ -70,7 +72,8 @@ const LoginPage = () => {
       if (result.length > 0) {
         setErrorsFromValidation(result)
       }
-      Router.push(getShopPath())
+
+      Router.push(getShopPath(INITIAL_PAGE_SHOP_PARAM))
     })()
   }, [isLoadingForm, email, password])
 
@@ -91,7 +94,7 @@ const LoginPage = () => {
   return (
     <Container>
       <Logo>
-        <Link href={getShopPath()}>
+        <Link href={getShopPath(INITIAL_PAGE_SHOP_PARAM)}>
             Emazon books
         </Link>
       </Logo>

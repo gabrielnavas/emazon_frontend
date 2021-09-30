@@ -1,4 +1,6 @@
+import { useEffect, useState } from 'react'
 import Link from 'next/link'
+import * as authenticatorUsecase from '../../usecase/authentication/Usecase'
 
 import { IconSearch, IconCart } from '../../icons'
 import {
@@ -23,18 +25,14 @@ import {
   Cart,
   AmountBooks
 } from './styles'
-import { useEffect, useState } from 'react'
-import { AuthenticatorManager } from '../../usecase/authentication/Usecase'
 
 const Header = () => {
   const [userFirstName, setUserFirstName] = useState('')
   const [isLogged, setIsLogged] = useState(false)
 
-  const authenticatorManager = new AuthenticatorManager()
-
   useEffect(() => {
-    if (authenticatorManager.isLogged()) {
-      const authData = authenticatorManager.get()
+    if (authenticatorUsecase.isLogged()) {
+      const authData = authenticatorUsecase.get()
       const firstName = authData.user.fullName.split(' ')[0]
       setUserFirstName(firstName)
       setIsLogged(true)

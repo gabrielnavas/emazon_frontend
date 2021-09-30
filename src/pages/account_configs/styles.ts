@@ -13,7 +13,7 @@ export const Content = styled.div`
   flex-direction: column;
   max-width: 740px;
   height: 100%;
-  margin-top: 20px;
+  margin-top: 30px;
 `
 
 export const Options = styled.ul`

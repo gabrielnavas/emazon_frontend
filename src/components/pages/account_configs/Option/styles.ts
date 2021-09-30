@@ -30,6 +30,7 @@ export const IconContainer = styled.div`
 export const Infos = styled.div`
   display: flex;
   flex-direction: column;
+  justify-content: flex-start;
   justify-content: center;
   width: 75%;
 `
@@ -38,6 +39,7 @@ export const Title = styled.div`
   color: #111;
   font-size: 17px;
   font-weight: 500;
+  margin-bottom: 5px;
 `
 
 export const Description = styled.div`

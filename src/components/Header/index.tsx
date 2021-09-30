@@ -1,7 +1,7 @@
 import Link from 'next/link'
 
 import { IconSearch, IconCart } from '../../icons'
-import { getShopPath } from '../../config/routesPath'
+import { getLoginPath, getShopPath } from '../../config/routesPath'
 
 import {
   Container,
@@ -18,8 +18,24 @@ import {
   Cart,
   AmountBooks
 } from './styles'
+import { useEffect, useState } from 'react'
+import { AuthenticatorManager } from '../../usecase/authentication/Usecase'
 
 const Header = () => {
+  const [userFirstName, setUserFirstName] = useState('')
+  const [isLogged, setIsLogged] = useState(false)
+
+  const authenticatorManager = new AuthenticatorManager()
+
+  useEffect(() => {
+    if (authenticatorManager.isLogged()) {
+      const authData = authenticatorManager.get()
+      const firstName = authData.user.fullName.split(' ')[0]
+      setUserFirstName(firstName)
+      setIsLogged(true)
+    }
+  }, [])
+
   return (
     <Container>
       <ContainerLeft>
@@ -41,13 +57,13 @@ const Header = () => {
       </ContainerFill>
       <ContainerRight>
       <HeaderLink>
-        <Link href='#'>
+        <Link href={isLogged ? 'Não tem conta?' : getLoginPath()}>
           <Profile>
             <span>
-              Olá, faça seu login
+              Olá, {isLogged ? userFirstName : 'faça seu login'}
             </span>
             <span>
-              Não tem conta?
+            {isLogged ? 'Minha conta' : 'Não tem conta?'}
             </span>
           </Profile>
         </Link>

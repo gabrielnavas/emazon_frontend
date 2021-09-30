@@ -1,6 +1,6 @@
 const LOCAL_STORAGE_USER_TOKEN = 'LOCAL_STORAGE_USER_TOKEN'
 
-type AuthData = {
+export type AuthData = {
   token: string,
   user: {
     fullName: string
@@ -8,14 +8,12 @@ type AuthData = {
   }
 }
 
-export class AuthenticatorManager {
-  set = (data: AuthData) => {
-    localStorage.setItem(LOCAL_STORAGE_USER_TOKEN, JSON.stringify(data))
-  }
+export const set = (data: AuthData): void =>
+  localStorage.setItem(LOCAL_STORAGE_USER_TOKEN, JSON.stringify(data))
 
-  get = (): AuthData | null => {
-    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_TOKEN))
-  }
+export const get = (): AuthData | null =>
+  JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_TOKEN))
 
-  isLogged = () => this.get() !== null
-}
+export const logOut = () => localStorage.removeItem(LOCAL_STORAGE_USER_TOKEN)
+
+export const isLogged = () => get() !== null

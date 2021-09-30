@@ -7,6 +7,7 @@ export const Container = styled.li`
   height: 95px;
   padding: 14px 0 14px 0;
   margin-top: 15px;
+  margin-left: 10px;
   font-family: inherit;
   border: 1px #D5D9D9 solid;
   cursor: pointer;

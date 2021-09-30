@@ -1,12 +1,20 @@
 const LOCAL_STORAGE_USER_TOKEN = 'LOCAL_STORAGE_USER_TOKEN'
 
-export class TokenManager {
-  set = (token: string) => {
-    localStorage.setItem(LOCAL_STORAGE_USER_TOKEN, token)
+type AuthData = {
+  token: string,
+  user: {
+    fullName: string
+    email: string
+  }
+}
+
+export class AuthenticatorManager {
+  set = (data: AuthData) => {
+    localStorage.setItem(LOCAL_STORAGE_USER_TOKEN, JSON.stringify(data))
   }
 
-  get = (): string | null => {
-    return localStorage.getItem(LOCAL_STORAGE_USER_TOKEN)
+  get = (): AuthData | null => {
+    return JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_TOKEN))
   }
 
   isLogged = () => this.get() !== null

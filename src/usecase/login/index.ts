@@ -1,7 +1,7 @@
 import { HttpRequest } from './HttpRequest'
 import { Validation } from './Validation'
 import { LoginUserUsecase } from './Usecase'
-import { TokenManager } from '../authentication/Usecase'
+import { AuthenticatorManager } from '../authentication/Usecase'
 
 export type { UsecaseError } from './Entity'
 export { errorsTypes } from './Validation'
@@ -9,7 +9,7 @@ export { errorsTypes } from './Validation'
 export const loginUseCaseFactory = () => {
   const validation = new Validation()
   const httpRequest = new HttpRequest()
-  const tokenManager = new TokenManager()
+  const tokenManager = new AuthenticatorManager()
   return new LoginUserUsecase(
     validation,
     httpRequest,

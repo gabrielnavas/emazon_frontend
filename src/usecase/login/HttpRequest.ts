@@ -3,13 +3,14 @@ import { User } from './Entity'
 
 type HttpResponse = {
   statusCode: number
-  data: {
+  data?: {
     token: string,
     user: {
       fullName: string
       email: string
     }
-  }
+  },
+  errors: string[]
 }
 
 export class HttpRequest {
@@ -33,15 +34,22 @@ export class HttpRequest {
       body: JSON.stringify(payload)
     })
     const data = await response.json()
+    if (response.status === 201) {
+      return {
+        statusCode: response.status,
+        data: {
+          token: data.token,
+          user: {
+            fullName: data.user.full_name,
+            email: data.user.email
+          }
+        },
+        errors: []
+      }
+    }
     return {
       statusCode: response.status,
-      data: {
-        token: data.token,
-        user: {
-          fullName: data.user.full_name,
-          email: data.user.email
-        }
-      }
+      errors: [data.detail]
     }
   }
 }

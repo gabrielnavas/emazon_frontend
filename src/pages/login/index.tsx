@@ -57,7 +57,7 @@ const LoginPage = () => {
   useEffect(() => {
     setPasswordMsg({
       isError: false,
-      message: 'As senhas devem ter pelo menos 6 caracteres.'
+      message: 'A senha deve ter pelo menos 6 caracteres.'
     })
   }, [])
 
@@ -67,15 +67,14 @@ const LoginPage = () => {
       const payloadForm = {
         email, password
       }
-      const result = await loginUsecase.handle(payloadForm)
+      const errors = await loginUsecase.handle(payloadForm)
       setIsLoadingForm(false)
-      if (result.length > 0) {
-        setErrorsFromValidation(result)
+      if (errors.length > 0) {
+        return setErrorsFromValidation(errors)
       }
-
       Router.push(getShopPath(INITIAL_PAGE_SHOP_PARAM))
     })()
-  }, [isLoadingForm, email, password])
+  }, [isLoadingForm, email, password, loginUsecase.handle])
 
   const setErrorsFromValidation = useCallback((results: UsecaseError[]) => {
     const errors = {
@@ -84,9 +83,11 @@ const LoginPage = () => {
     }
     results.forEach(result => {
       const useStateGetted = errors[result.fieldName]
-      useStateGetted({ isError: true, message: result.message })
+      if (useStateGetted) {
+        useStateGetted({ isError: true, message: result.message })
+      }
       if (result.fieldName === errorsTypes.GlobalError) {
-        setGlobalErrors(old => [{ isError: true, message: result.message }, ...old])
+        setGlobalErrors([{ isError: true, message: result.message }])
       }
     })
   }, [errorsTypes])

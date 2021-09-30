@@ -1,4 +1,12 @@
+import { useCallback, useEffect } from 'react'
+import Router from 'next/router'
+
+import { getLoginPath, getSalesManConfigsPath } from '../../config/routesPath'
+
+import * as authenticatorUsecase from '../../usecase/authentication/Usecase'
+
 import Header from '../../components/Header'
+import Option from '../../components/pages/account_configs/Option'
 
 import {
   Container,
@@ -11,12 +19,22 @@ import {
   IconPackage,
   IconSecurity,
   IconAddress,
-  IconSeller
+  IconSeller,
+  IconLogOut
 } from '../../icons'
 
-import Option from '../../components/pages/account_configs/Option'
+const AccountConfigsPage = () => {
+  useEffect(() => {
+    if (!authenticatorUsecase.isLogged()) {
+      Router.replace(getLoginPath())
+    }
+  }, [authenticatorUsecase.isLogged])
 
-const RegisterPage = () => {
+  const handleLogout = useCallback(() => {
+    authenticatorUsecase.logOut()
+    Router.replace(getLoginPath())
+  }, [authenticatorUsecase.logOut])
+
   return (
     <Container>
       <Header />
@@ -42,10 +60,17 @@ const RegisterPage = () => {
             description='Alterar, adicionar ou excluir algum endereço.'
           />
           <Option
-            href='#'
+            href={getSalesManConfigsPath()}
             icon={<IconSeller />}
             title='Vendedor'
             description='Tornar-se vendedor na plataforma ou adicionar livros.'
+          />
+          <Option
+            href='#'
+            onClick={handleLogout}
+            icon={<IconLogOut />}
+            title='Sair'
+            description='Deslogar da conta atual.'
           />
         </Options>
       </Content>
@@ -59,4 +84,4 @@ export async function getStaticProps (context) {
   }
 }
 
-export default RegisterPage
+export default AccountConfigsPage

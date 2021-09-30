@@ -14,12 +14,13 @@ type Props = {
   description: string
   href: string
   icon: ReactNode
+  onClick?: () => void
 }
 
 const Option = (props: Props) => {
   return (
     <Link href={props.href}>
-      <Container>
+      <Container onClick={props.onClick}>
         <IconContainer>
           {props.icon}
         </IconContainer>

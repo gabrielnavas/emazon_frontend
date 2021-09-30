@@ -54,12 +54,6 @@ const LoginPage = () => {
 
   const loginUsecase = loginUseCaseFactory()
 
-  useEffect(() => {
-    setPasswordMsg({
-      isError: false,
-      message: 'A senha deve ter pelo menos 6 caracteres.'
-    })
-  }, [])
 
   const handleButtonFinish = useCallback(() => {
     (async () => {

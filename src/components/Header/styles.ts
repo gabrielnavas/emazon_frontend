@@ -36,13 +36,13 @@ export const HeaderLink = styled.div`
   align-items: center;
   height: 56px;
   min-width: 75px;
-  padding: 0 10px 0 10px;
-  margin: 0 15px 0 15px;
+  padding: 0 8px 0 8px;
+  margin: 0 13px 0 13px;
   cursor: pointer;
-  border: 2px solid #0000;
+  border: 1.2px solid #0000;
 
   &:hover {
-    border: 2px solid white;
+    border: 1.2px solid white;
     border-radius: 5px;
   }
 `

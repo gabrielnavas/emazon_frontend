@@ -16,14 +16,14 @@ export const ButtonNextPage = styled.button`
   align-items: center;
   padding: 7px 11px;
   margin: 0 3px 0 3px;
-  background-color: ${props => props.isPrimaryPage ? '#0000' : 'linear-gradient(to bottom,#f7f8fa,#e7e9ec)'};
+  background-color: ${({ isPrimaryPage, isLastPage }) => isPrimaryPage || isLastPage ? '#0000' : 'linear-gradient(to bottom,#f7f8fa,#e7e9ec)'};
   color: ${props => props.isPrimaryPage ? '#555' : '#222'};
   font-weight: 400;
   font-size: 14px;
   outline: none;
   border-radius: 3px;
-  border: ${props => props.isPrimaryPage ? '1px solid #0000' : '1px solid #aaa'};
-  cursor: ${props => props.isPrimaryPage ? 'default' : 'pointer'};
+  border: ${({ isPrimaryPage, isLastPage }) => isPrimaryPage || isLastPage ? '1px solid #0000' : '1px solid #aaa'};
+  cursor: ${({ isPrimaryPage, isLastPage }) => isPrimaryPage || isLastPage ? 'default' : 'pointer'};
 
   & svg {
     color: ${props => props.isPrimaryPage || props.isPrimaryPage ? '#555' : '#222'};

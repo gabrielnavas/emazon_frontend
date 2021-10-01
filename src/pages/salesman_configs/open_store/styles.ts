@@ -9,16 +9,6 @@ export const Container = styled.div`
   max-width: 100vw;
 `
 
-export const Logo = styled.span`
-  color: white;
-  font-weight: bold;
-  font-size: 38px;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI';
-  border-bottom: 5px ridge ${props => props.theme.default.colors.gold};
-  color: #333;
-  margin: 20px 0 35px 0;
-`
-
 export const Card = styled.section`
   display: flex;
   flex-direction: column;
@@ -134,7 +124,7 @@ export const ButtonFinish = styled.button`
   height: 29px;
   margin-bottom: 20px;
   cursor: pointer;
-`
+  `
 
 export const LegalText = styled.div`
   width: 100%;
@@ -149,21 +139,13 @@ export const LegalText = styled.div`
   }
 `
 
-export const BarSeparateCard = styled.div`
-  width: 85%;
-  height: 44px;
-  margin-bottom: -18px;
-  background: linear-gradient(to bottom,rgba(0,0,0,.14),rgba(0,0,0,.03) 3px,transparent);
-  color: #111;
-`
-
 export const BarSeparatePage = styled.div`
   width: 85%;
   height: 5px;
   margin: 40px 0 10px 0;
   background: linear-gradient(to bottom,rgba(0,0,0,.14),rgba(0,0,0,.03) 3px,transparent);
   color: #111;
-  `
+`
 
 export const FooterPage = styled.footer`
   display: flex;
@@ -171,18 +153,6 @@ export const FooterPage = styled.footer`
   justify-content: center;
   align-items: center;
   width: 100%;
-`
-
-export const RegisterOption = styled.div`
-  width: 100%;
-  font-size: 13px;
-  line-height: 19px;
-  margin-left: 10px;
-
-  & span:nth-child(2) {
-    color: ${props => props.theme.default.colors.blueAlt};
-    text-decoration: none;
-  }
 `
 
 export const FooterOptions = styled.nav`

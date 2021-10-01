@@ -1,17 +1,15 @@
 import { HttpRequest } from './HttpRequest'
 import { Validation } from './Validation'
-import { LoginUserUsecase } from './Usecase'
-import * as AuthenticationManager from '../authentication/Usecase'
+import { OpenStoreUserUsecase } from './Usecase'
 
 export type { UsecaseError } from './Entity'
 export { errorsTypes } from './Validation'
 
-export const loginUseCaseFactory = () => {
+export const openStoreUseCaseFactory = () => {
   const validation = new Validation()
   const httpRequest = new HttpRequest()
-  return new LoginUserUsecase(
+  return new OpenStoreUserUsecase(
     validation,
-    httpRequest,
-    AuthenticationManager.set
+    httpRequest
   )
 }

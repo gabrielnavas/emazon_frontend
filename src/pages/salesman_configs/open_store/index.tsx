@@ -1,12 +1,8 @@
 import { useCallback, useState } from 'react'
 import Link from 'next/link'
-import Router from 'next/router'
-
-import { getRegisterPath, getShopPath } from '../../config/routesPath'
 
 import {
   Container,
-  Logo,
   Card,
   Form,
   Title,
@@ -15,10 +11,8 @@ import {
   InputText,
   FormInfo,
   ButtonFinish,
-  RegisterOption,
   LegalText,
   BarSeparatePage,
-  BarSeparateCard,
   FooterPage,
   FooterOptions,
   OptionLink,
@@ -26,15 +20,9 @@ import {
   GlobalErrors
 } from './styles'
 
-import { IconInfoForm } from '../../icons'
+import { IconInfoForm } from '../../../icons'
 
-import {
-  loginUseCaseFactory,
-  UsecaseError,
-  errorsTypes
-} from '../../usecase/login'
-
-const INITIAL_PAGE_SHOP_PARAM = '0'
+import { errorsTypes, UsecaseError, openStoreUseCaseFactory } from '../../../usecase/open_store'
 
 type FormInfoState = {
   isError?: boolean
@@ -43,44 +31,46 @@ type FormInfoState = {
 
 const initFormInfoState = () => ({ isError: false, message: '' }) as FormInfoState
 
-const LoginPage = () => {
-  const [email, setEmail] = useState('')
-  const [emailMsg, setEmailMsg] = useState<FormInfoState>(initFormInfoState())
+const RegisterPage = () => {
+  const [fantasyName, setFantasyName] = useState('')
+  const [fantasyNameMsg, setFantasyNameMsg] = useState<FormInfoState>(initFormInfoState())
 
-  const [password, setPassword] = useState('')
-  const [passwordMsg, setPasswordMsg] = useState<FormInfoState>(initFormInfoState())
+  const [cpf, setCpf] = useState('')
+  const [cpfMsg, setCpfMsg] = useState<FormInfoState>(initFormInfoState())
+
+  const [cnpj, setCnpj] = useState('')
+  const [cnpjMsg, setCnpjMsg] = useState<FormInfoState>(initFormInfoState())
 
   const [globalErrors, setGlobalErrors] = useState<FormInfoState[]>([])
 
   const [isLoadingForm, setIsLoadingForm] = useState(false)
 
-  const loginUsecase = loginUseCaseFactory()
+  const openStoreUsecase = openStoreUseCaseFactory()
 
   const handleButtonFinish = useCallback(() => {
     (async () => {
       setIsLoadingForm(true)
       const payloadForm = {
-        email, password
+        fantasyName, cpf, cnpj
       }
-      const errors = await loginUsecase.handle(payloadForm)
+      const result = await openStoreUsecase.handle(payloadForm)
       setIsLoadingForm(false)
-      if (errors.length > 0) {
-        return setErrorsFromValidation(errors)
+      if (result.length > 0) {
+        setErrorsFromValidation(result)
       }
-      Router.push(getShopPath(INITIAL_PAGE_SHOP_PARAM))
+      // Router.push(getLoginPath())
     })()
-  }, [isLoadingForm, email, password, loginUsecase.handle])
+  }, [isLoadingForm, fantasyName, cpf, cnpj])
 
   const setErrorsFromValidation = useCallback((results: UsecaseError[]) => {
     const errors = {
-      [errorsTypes.EmailError]: setEmailMsg,
-      [errorsTypes.PasswordError]: setPasswordMsg
+      [errorsTypes.fantasyNameError]: setFantasyNameMsg,
+      [errorsTypes.cpfError]: setCpfMsg,
+      [errorsTypes.cnpjError]: setCnpjMsg
     }
     results.forEach(result => {
       const useStateGetted = errors[result.fieldName]
-      if (useStateGetted) {
-        useStateGetted({ isError: true, message: result.message })
-      }
+      useStateGetted({ isError: true, message: result.message })
       if (result.fieldName === errorsTypes.GlobalError) {
         setGlobalErrors([{ isError: true, message: result.message }])
       }
@@ -89,36 +79,42 @@ const LoginPage = () => {
 
   return (
     <Container>
-      <Logo>
-        <Link href={getShopPath(INITIAL_PAGE_SHOP_PARAM)}>
-            Emazon books
-        </Link>
-      </Logo>
       <Card>
         <Form>
-          <Title>Fazer login</Title>
+          <Title>Abrir loja na plataforma</Title>
           <FormGroup>
-            <Label>Email</Label>
-            <InputText isError={emailMsg.isError} value={email} onChange={e => setEmail(e.target.value)} />
+            <Label>Nome fantasia</Label>
+            <InputText isError={fantasyNameMsg.isError} value={fantasyName} onChange={e => setFantasyName(e.target.value)} />
             {
-              emailMsg.message.length > 0 &&
-                <FormInfo isError={emailMsg.isError}>
+              fantasyNameMsg.message.length > 0 &&
+                <FormInfo isError={fantasyNameMsg.isError}>
                   <IconInfoForm />
-                  {emailMsg.message}
+                  {fantasyNameMsg.message}
                 </FormInfo>
             }
           </FormGroup>
           <FormGroup>
-            <Label>Senha</Label>
-            <InputText isError={passwordMsg.isError} type='password' value={password} onChange={e => setPassword(e.target.value)} />
+            <Label>CPF</Label>
+            <InputText isError={cpfMsg.isError} type='password' value={cpf} onChange={e => setCpf(e.target.value)} />
             {
-              passwordMsg.message.length > 0 &&
-                <FormInfo isError={passwordMsg.isError}>
+              cpfMsg.message.length > 0 &&
+                <FormInfo isError={cpfMsg.isError}>
                   <IconInfoForm />
-                  {passwordMsg.message}
+                  {cpfMsg.message}
                 </FormInfo>
             }
-            <GlobalErrors>
+          </FormGroup>
+          <FormGroup>
+            <Label>CNPJ</Label>
+            <InputText isError={cnpjMsg.isError} type='password' value={cnpj} onChange={e => setCnpj(e.target.value)} />
+            {
+              cnpjMsg.message.length > 0 &&
+                <FormInfo isError={cnpjMsg.isError}>
+                  <IconInfoForm />
+                  {cnpjMsg.message}
+                </FormInfo>
+            }
+          <GlobalErrors>
             {
               globalErrors.map((error, index) => (
                   <FormInfo key={index} isError={error.isError}>
@@ -132,17 +128,12 @@ const LoginPage = () => {
           <ButtonFinish
             disabled={isLoadingForm}
             onClick={e => { e.preventDefault(); handleButtonFinish() }}>
-            {isLoadingForm ? 'Aguarde' : 'Logar'}
+            {isLoadingForm ? 'Aguarde' : 'Abrir loja'}
           </ButtonFinish>
         </Form>
         <LegalText>
-          Ao continuar, você concorda com as  <span><Link href='#'>Condições de Uso da Emazon.</Link></span>
+          Ao criar uma conta, você concorda com as <span><Link href='#'>Condições de Uso da Emazon.</Link></span>
         </LegalText>
-        <BarSeparateCard />
-          <RegisterOption>
-            <span>Você não tem uma conta?</span>
-            <span> <Link href={getRegisterPath()}>Me registrar</Link></span>
-          </RegisterOption>
       </Card>
       <BarSeparatePage />
       <FooterPage>
@@ -168,4 +159,4 @@ export async function getStaticProps (context) {
   }
 }
 
-export default LoginPage
+export default RegisterPage

@@ -102,7 +102,7 @@ const RegisterPage = () => {
   return (
     <Container>
       <Logo>
-        <Link href={getShopPath()}>
+        <Link href={getShopPath('0')}>
             Emazon books
         </Link>
       </Logo>
@@ -175,7 +175,7 @@ const RegisterPage = () => {
         <BarSeparateCard />
         <LoginOption>
           <span>Você já tem uma conta?</span>
-          <span> <Link href='#'>Fazer login</Link></span>
+          <span> <Link href={getLoginPath()}>Fazer login</Link></span>
         </LoginOption>
       </Card>
       <BarSeparatePage />

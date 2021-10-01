@@ -16,9 +16,9 @@ import {
 } from './styles'
 
 import {
-  IconPackage,
-  IconSecurity,
-  IconAddress,
+  // IconPackage,
+  // IconSecurity,
+  // IconAddress,
   IconSeller,
   IconLogOut
 } from '../../icons'
@@ -41,7 +41,7 @@ const AccountConfigsPage = () => {
       <Content>
         <Title>Sua conta</Title>
         <Options>
-          <Option
+          {/* <Option
             href='#'
             icon={<IconPackage />}
             title='Seus pedidos'
@@ -58,12 +58,12 @@ const AccountConfigsPage = () => {
             icon={<IconAddress />}
             title='Endereços'
             description='Alterar, adicionar ou excluir algum endereço.'
-          />
+          /> */}
           <Option
             href={getSalesManConfigsPath()}
             icon={<IconSeller />}
             title='Vendedor'
-            description='Tornar-se vendedor na plataforma ou adicionar livros.'
+            description='Tornar-se vendedor na plataforma e gerenciar a loja.'
           />
           <Option
             href='#'

@@ -1,14 +1,16 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
+
 import * as authenticatorUsecase from '../../usecase/authentication/Usecase'
+
+import { PRIMARY_PAGE } from '../pages/shop/Navigation'
 
 import { IconSearch, IconCart } from '../../icons'
 import {
   getAccountConfigsPath,
   getLoginPath,
   getShopPath
-}
-  from '../../config/routesPath'
+} from '../../config/routesPath'
 
 import {
   Container,
@@ -43,7 +45,7 @@ const Header = () => {
     <Container>
       <ContainerLeft>
         <HeaderLink>
-          <Link href={getShopPath('0')}>
+          <Link href={getShopPath(PRIMARY_PAGE.toString())}>
             <Logo>
               Emazon books
             </Logo>

@@ -1,8 +1,13 @@
-import { useCallback, useEffect, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Router from 'next/router'
 
+import { useFormik } from 'formik'
+
 import { getLoginPath, getShopPath } from '../../config/routesPath'
+
+import { httpRequestRegister } from '../../usecase/register/HttpRequest'
+import { validate } from '../../usecase/register/Validation'
 
 import {
   Container,
@@ -28,76 +33,39 @@ import {
 
 import { IconInfoForm } from '../../icons'
 
-import {
-  registerUseCaseFactory,
-  UsecaseError,
-  errorsTypes
-} from '../../usecase/register'
-
-type FormInfoState = {
-  isError?: boolean
-  message?: string
+export type RegisterFormData = {
+  fullName: string
+  email: string
+  password: string
+  passwordConfirmation: string
 }
 
-const initFormInfoState = () => ({ isError: false, message: '' }) as FormInfoState
-
 const RegisterPage = () => {
-  const [name, setName] = useState('')
-  const [nameMsg, setNameMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [email, setEmail] = useState('')
-  const [emailMsg, setEmailMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [password, setPassword] = useState('')
-  const [passwordMsg, setPasswordMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [passwordConfirmation, setPasswordConfirmation] = useState('')
-  const [passwordConfirmationMsg, setPasswordConfirmationMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [globalErrors, setGlobalErrors] = useState<FormInfoState[]>([])
-
   const [isLoadingForm, setIsLoadingForm] = useState(false)
+  const [globalErrors, setGlobalErrors] = useState('')
 
-  const registerUsecase = registerUseCaseFactory()
-
-  useEffect(() => {
-    setPasswordMsg({
-      isError: false,
-      message: 'As senhas devem ter pelo menos 6 caracteres.'
-    })
-  }, [])
-
-  const handleButtonFinish = useCallback(() => {
-    (async () => {
+  const formik = useFormik({
+    initialValues: {
+      fullName: '',
+      email: '',
+      password: '',
+      passwordConfirmation: ''
+    } as RegisterFormData,
+    validate,
+    onSubmit: async () => {
       setIsLoadingForm(true)
       const payloadForm = {
-        name, email, password, passwordConfirmation
-      }
-      const result = await registerUsecase.handle(payloadForm)
+        ...formik.values
+      } as RegisterFormData
+      const result = await httpRequestRegister(payloadForm)
       setIsLoadingForm(false)
-      if (result.length > 0) {
-        setErrorsFromValidation(result)
+      if (result.statusCode === 400) {
+        setGlobalErrors('Já existe uma conta com esse email')
         return
       }
       Router.push(getLoginPath())
-    })()
-  }, [isLoadingForm, name, email, password, passwordConfirmation])
-
-  const setErrorsFromValidation = useCallback((results: UsecaseError[]) => {
-    const errors = {
-      [errorsTypes.NameError]: setNameMsg,
-      [errorsTypes.EmailError]: setEmailMsg,
-      [errorsTypes.PasswordError]: setPasswordMsg,
-      [errorsTypes.PasswordConfirmationError]: setPasswordConfirmationMsg
     }
-    results.forEach(result => {
-      const useStateGetted = errors[result.fieldName]
-      useStateGetted({ isError: true, message: result.message })
-      if (result.fieldName === errorsTypes.GlobalError) {
-        setGlobalErrors(old => [{ isError: true, message: result.message }, ...old])
-      }
-    })
-  }, [errorsTypes])
+  })
 
   return (
     <Container>
@@ -110,62 +78,86 @@ const RegisterPage = () => {
         <Form>
           <Title>Criar conta</Title>
           <FormGroup>
-            <Label>Seu nome</Label>
-            <InputText isError={nameMsg.isError} value={name} onChange={e => setName(e.target.value)} />
+            <Label>Seu nome completo</Label>
+            <InputText
+              id="fullName"
+              name="fullName"
+              type="text"
+              isError={formik.errors.fullName}
+              value={formik.values.fullName}
+              onChange={formik.handleChange} />
             {
-              nameMsg.message.length > 0 &&
-                <FormInfo isError={nameMsg.isError} >
+              formik.errors.fullName &&
+                <FormInfo >
                   <IconInfoForm />
-                  {nameMsg.message}
+                  {formik.errors.fullName}
                 </FormInfo>
             }
           </FormGroup>
           <FormGroup>
             <Label>Seu email</Label>
-            <InputText isError={emailMsg.isError} value={email} onChange={e => setEmail(e.target.value)} />
+            <InputText
+              id="email"
+              name="email"
+              type="email"
+              isError={formik.errors.email}
+              value={formik.values.email}
+              onChange={formik.handleChange} />
             {
-              emailMsg.message.length > 0 &&
-                <FormInfo isError={emailMsg.isError}>
-                  <IconInfoForm />
-                  {emailMsg.message}
-                </FormInfo>
+               formik.errors.email &&
+               <FormInfo >
+                 <IconInfoForm />
+                 {formik.errors.email}
+               </FormInfo>
             }
           </FormGroup>
           <FormGroup>
             <Label>Senha</Label>
-            <InputText isError={passwordMsg.isError} type='password' value={password} onChange={e => setPassword(e.target.value)} />
+            <InputText
+               id="password"
+               name="password"
+               type="password"
+               isError={formik.errors.password}
+               value={formik.values.password}
+               onChange={formik.handleChange} />
             {
-              passwordMsg.message.length > 0 &&
-                <FormInfo isError={passwordMsg.isError}>
-                  <IconInfoForm />
-                  {passwordMsg.message}
-                </FormInfo>
+              formik.errors.password &&
+              <FormInfo >
+                <IconInfoForm />
+                {formik.errors.password}
+              </FormInfo>
             }
           </FormGroup>
           <FormGroup>
             <Label>Insira a senha nova mais uma vez</Label>
-            <InputText isError={nameMsg.isError} type='password' value={passwordConfirmation} onChange={e => setPasswordConfirmation(e.target.value)} />
+            <InputText
+               id="passwordConfirmation"
+               name="passwordConfirmation"
+               type="password"
+               isError={formik.errors.passwordConfirmation}
+               value={formik.values.passwordConfirmation}
+               onChange={formik.handleChange} />
             {
-              passwordConfirmationMsg.message.length > 0 &&
-                <FormInfo isError={passwordConfirmationMsg.isError}>
-                  <IconInfoForm />
-                  {passwordConfirmationMsg.message}
-                </FormInfo>
+              formik.errors.passwordConfirmation &&
+              <FormInfo >
+                <IconInfoForm />
+                {formik.errors.passwordConfirmation}
+              </FormInfo>
             }
-          <GlobalErrors>
             {
-              globalErrors.map((error, index) => (
-                  <FormInfo key={index} isError={error.isError}>
+              globalErrors && (
+                <GlobalErrors>
+                  <FormInfo>
                     <IconInfoForm />
-                    {error.message}
+                    {globalErrors}
                   </FormInfo>
-              ))
+                </GlobalErrors>
+              )
             }
-          </GlobalErrors>
           </FormGroup>
           <ButtonFinish
             disabled={isLoadingForm}
-            onClick={e => { e.preventDefault(); handleButtonFinish() }}>
+            onClick={e => { e.preventDefault(); formik.handleSubmit() }}>
             {isLoadingForm ? 'Aguarde' : 'Cadastrar'}
           </ButtonFinish>
         </Form>

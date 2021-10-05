@@ -102,19 +102,14 @@ export const GlobalErrors = styled.div`
 export const FormInfo = styled.div`
   display: flex;
   align-items: center;
-  font-size: 11px;
+  font-size: 12px;
+  font-weight: 600;
   width: 100%;
   line-height: 1.1;
-  color: ${props => props.isError
-      ? props.theme.default.colors.textError
-      : '#2b2b2b'
-  };
+  color: #2a2a2a;
 
   & svg {
-    color: ${props => props.isError
-      ? props.theme.default.colors.textError
-      : props.theme.default.colors.blueAlt
-    };
+    color: ${props => props.theme.default.colors.blueAlt};
     font-size: 18px;
   }
 `

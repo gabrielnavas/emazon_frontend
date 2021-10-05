@@ -19,7 +19,7 @@ type Props = {
   limit: number
 }
 
-const PRIMARY_PAGE = 0
+export const PRIMARY_PAGE = 1
 
 const NavigationShop = ({ currectPage, limit }: Props) =>
   <Container>

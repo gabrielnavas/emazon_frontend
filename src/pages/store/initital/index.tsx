@@ -2,10 +2,15 @@ import { useEffect } from 'react'
 import Router from 'next/router'
 import Link from 'next/link'
 
-import { getLoginPath, getOpenShopPath, getShopPath } from '../../config/routesPath'
-import * as authenticatorUsecase from '../../usecase/authentication/Usecase'
+import {
+  getAccountConfigsPath,
+  getLoginPath,
+  getOpenShopPath,
+  getShopPath
+} from '../../../config/routesPath'
+import * as authenticatorUsecase from '../../../usecase/authentication/Usecase'
 
-import Header from '../../components/Header'
+import Header from '../../../components/Header'
 
 import {
   Container,
@@ -15,12 +20,15 @@ import {
   ButtonInitSalesMan
 } from './styles'
 
-const SalesManConfigPage = () => {
+const InititalPage = () => {
   useEffect(() => {
     if (!authenticatorUsecase.isLogged()) {
       Router.replace(getLoginPath())
     }
-  }, [authenticatorUsecase.isLogged])
+    if (authenticatorUsecase.hasStore()) {
+      Router.replace(getAccountConfigsPath())
+    }
+  }, [authenticatorUsecase.isLogged, authenticatorUsecase.hasStore])
 
   return (
     <Container>
@@ -41,4 +49,4 @@ export async function getStaticProps (context) {
   }
 }
 
-export default SalesManConfigPage
+export default InititalPage

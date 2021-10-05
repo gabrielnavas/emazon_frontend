@@ -45,8 +45,14 @@ export const ButtonInitSalesMan = styled.div`
   font-size: 24px;
   color: #232f3e;
   background-color: #f90;
-  border: 2px solid #f90;
+  border: 1px solid #f90;
   border-radius: 34px;
   box-shadow: 0 0 16px rgb(0 0 0 / 20%);
   width: 300px;
+  cursor: pointer;
+
+  &:hover {
+    background-color: ${props => props.theme.default.colors.gold};
+    border: 1px solid ${props => props.theme.default.colors.yellow};
+  }
 `

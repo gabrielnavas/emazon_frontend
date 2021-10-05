@@ -33,8 +33,7 @@ import {
   UsecaseError,
   errorsTypes
 } from '../../usecase/login'
-
-const INITIAL_PAGE_SHOP_PARAM = '0'
+import { PRIMARY_PAGE_SHOP } from '../../components/pages/shop/Navigation'
 
 type FormInfoState = {
   isError?: boolean
@@ -67,7 +66,7 @@ const LoginPage = () => {
       if (errors.length > 0) {
         return setErrorsFromValidation(errors)
       }
-      Router.push(getShopPath(INITIAL_PAGE_SHOP_PARAM))
+      Router.push(getShopPath(PRIMARY_PAGE_SHOP.toString()))
     })()
   }, [isLoadingForm, email, password, loginUsecase.handle])
 
@@ -90,7 +89,7 @@ const LoginPage = () => {
   return (
     <Container>
       <Logo>
-        <Link href={getShopPath(INITIAL_PAGE_SHOP_PARAM)}>
+        <Link href={getShopPath(PRIMARY_PAGE_SHOP.toString())}>
             Emazon books
         </Link>
       </Logo>

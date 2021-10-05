@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 import * as authenticatorUsecase from '../../usecase/authentication/Usecase'
 
-import { PRIMARY_PAGE } from '../pages/shop/Navigation'
+import { PRIMARY_PAGE_SHOP } from '../pages/shop/Navigation'
 
 import { IconSearch, IconCart } from '../../icons'
 import {
@@ -45,7 +45,7 @@ const Header = () => {
     <Container>
       <ContainerLeft>
         <HeaderLink>
-          <Link href={getShopPath(PRIMARY_PAGE.toString())}>
+          <Link href={getShopPath(PRIMARY_PAGE_SHOP.toString())}>
             <Logo>
               Emazon books
             </Logo>

@@ -1,4 +1,4 @@
-import { PRIMARY_PAGE } from '../components/pages/shop/Navigation'
+import { PRIMARY_PAGE_SHOP } from '../components/pages/shop/Navigation'
 import { getShopPath } from '../config/routesPath'
 
 export default function Home () {
@@ -8,7 +8,7 @@ export default function Home () {
 export async function getServerSideProps (context) {
   return {
     redirect: {
-      destination: getShopPath(PRIMARY_PAGE.toString()),
+      destination: getShopPath(PRIMARY_PAGE_SHOP.toString()),
       permanent: false
     }
   }

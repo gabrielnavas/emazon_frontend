@@ -5,6 +5,9 @@ export type AuthData = {
   user: {
     fullName: string
     email: string
+  },
+  store?: {
+    fantasyName: string
   }
 }
 
@@ -14,6 +17,8 @@ export const set = (data: AuthData): void =>
 export const get = (): AuthData | null =>
   JSON.parse(localStorage.getItem(LOCAL_STORAGE_USER_TOKEN))
 
-export const logOut = () => localStorage.removeItem(LOCAL_STORAGE_USER_TOKEN)
+export const logOut = (): void => localStorage.removeItem(LOCAL_STORAGE_USER_TOKEN)
 
-export const isLogged = () => get() !== null
+export const isLogged = (): boolean => get() !== null
+
+export const hasStore = (): boolean => get().store !== null

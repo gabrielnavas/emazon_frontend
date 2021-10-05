@@ -14,10 +14,10 @@ export const Card = styled.section`
   flex-direction: column;
   align-items: center;
   border-radius: 4px;
-  padding: 14px 18px;
+  padding: 30px 40px;
   color: #111;
-  border: 1px solid #ddd;
-  max-width: 310px;
+  max-width: 510px;
+  margin-top: 0px;
 `
 
 export const Title = styled.span`
@@ -27,6 +27,7 @@ export const Title = styled.span`
   line-height: 1.3;
   margin-bottom: 18px;
   width: 100%;
+  margin: 26px 0 35px 0;
 `
 
 export const Form = styled.form`
@@ -170,4 +171,53 @@ export const Signature = styled.div`
   color: #555;
   font-size: 11px;
   font-family: inherit;
+`
+
+export const CpfOrCnpjInput = styled.input`
+  height: 100%;
+  padding: 3px 7px;
+  width: 100%;
+  border: none;
+  outline: none;
+  border-bottom-right-radius: 6px;
+  border-top-right-radius: 6px;
+
+  &:focus {
+    border: 1px solid ${props => props.isError
+      ? props.theme.default.colors.textError
+      : props => props.theme.default.colors.yellowAlt
+    };
+    -webkit-box-shadow: 0px 0px 4px 0.5px ${props => props.isError
+      ? props.theme.default.colors.textError
+      : props => props.theme.default.colors.yellowAlt
+    };
+    -moz-box-shadow: 0px 0px 4px 0.5px ${props => props.isError
+      ? props.theme.default.colors.textError
+      : props => props.theme.default.colors.yellowAlt
+    };
+    box-shadow: 0px 0px 4px 0.5px ${props => props.isError
+      ? props.theme.default.colors.textError
+      : props => props.theme.default.colors.yellowAlt
+    };
+  }
+`
+
+export const CpfOrCnpj = styled.div`
+  display: flex;
+
+  height: 31px;
+  padding: 0 0 0 7px 0;
+  width: 100%;
+  border: 1px solid ${props => props.isError
+      ? props.theme.default.colors.textError
+      : '#a6a6a6'
+    };
+  border-radius: 6px;
+  outline: none;
+
+  & select {
+    border: none;
+    background-color: #0000;
+    outline: none;
+  }
 `

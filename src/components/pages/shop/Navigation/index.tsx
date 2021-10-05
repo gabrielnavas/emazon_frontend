@@ -19,14 +19,14 @@ type Props = {
   limit: number
 }
 
-export const PRIMARY_PAGE = 1
+export const PRIMARY_PAGE_SHOP = 1
 
 const NavigationShop = ({ currectPage, limit }: Props) =>
   <Container>
     <Link
-      href={currectPage === PRIMARY_PAGE ? getShopPath((currectPage).toString()) : getShopPath((currectPage - 1).toString())}>
+      href={currectPage === PRIMARY_PAGE_SHOP ? getShopPath((currectPage).toString()) : getShopPath((currectPage - 1).toString())}>
       <ButtonNextPage
-        isPrimaryPage={currectPage === PRIMARY_PAGE}
+        isPrimaryPage={currectPage === PRIMARY_PAGE_SHOP}
         isRightButton>
           <IconArrowLeftPagination />
           Anterior
@@ -63,8 +63,8 @@ const NavigationShop = ({ currectPage, limit }: Props) =>
     </Link>
   </Container>
 
-const getRange = (currectPage: number = PRIMARY_PAGE, limit: number) => {
-  const start = currectPage > PRIMARY_PAGE ? currectPage - 1 : currectPage
+const getRange = (currectPage: number = PRIMARY_PAGE_SHOP, limit: number) => {
+  const start = currectPage > PRIMARY_PAGE_SHOP ? currectPage - 1 : currectPage
   const end = currectPage + 2
   return Array(end - start + 1)
     .fill(undefined)

@@ -24,7 +24,8 @@ export class LoginUserUsecase {
         user: {
           email: response.data.user.email,
           fullName: response.data.user.fullName
-        }
+        },
+        store: response.data.store
       })
     } else if (response.statusCode === 404) {
       return [{

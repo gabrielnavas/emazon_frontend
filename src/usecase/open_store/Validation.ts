@@ -1,3 +1,4 @@
+import { validateCnpj, validateCpf } from '../../utils/validate/brasil'
 import { UsecaseError, Store } from './Entity'
 
 export const errorsTypes = {
@@ -8,18 +9,18 @@ export const errorsTypes = {
 }
 
 export class Validation {
-  handle = (user: Store) => {
+  handle = (store: Store) => {
     const errors = [] as UsecaseError[]
-    if (user.fantasyName.length <= 1 || user.fantasyName.length > 100) {
+    if (store.fantasyName.length <= 1 || store.fantasyName.length > 100) {
       errors.push({ fieldName: errorsTypes.fantasyNameError, message: 'Nome fantasia deve ter entre 2 e 100 caracteres' })
     }
-    if (user.cnpj.length !== 11) {
-      errors.push({ fieldName: errorsTypes.cnpjError, message: 'cpf deve 11 caracteres' })
+    if (store.cpf && !validateCpf(store.cpf)) {
+      errors.push({ fieldName: errorsTypes.cpfError, message: 'CPF inválido' })
     }
-    if (user.cpf.length !== 14) {
+    if (store.cnpj && !validateCnpj(store.cnpj)) {
       errors.push({
-        fieldName: errorsTypes.cpfError,
-        message: 'CNPJ deve ter 14 caracteres'
+        fieldName: errorsTypes.cnpjError,
+        message: 'CNPJ inválido'
       })
     }
     return errors

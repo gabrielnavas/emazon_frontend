@@ -8,6 +8,9 @@ type HttpResponse = {
     user: {
       fullName: string
       email: string
+    },
+    store?: {
+      fantasyName: string
     }
   },
   errors: string[]
@@ -42,6 +45,9 @@ export class HttpRequest {
           user: {
             fullName: data.user.full_name,
             email: data.user.email
+          },
+          store: data.store && {
+            fantasyName: data.store.fantasy_name
           }
         },
         errors: []

@@ -1,21 +1,15 @@
-import { UsecaseError, User } from './Entity'
+import { LoginFormData } from '../../pages/login'
 import * as emailValidator from '../../utils/email'
 
-export const errorsTypes = {
-  GlobalError: 'globalFormError',
-  EmailError: 'email',
-  PasswordError: 'password'
-}
+type Validation = (form: LoginFormData) => LoginFormData
 
-export class Validation {
-  handle = (user: User) => {
-    const errors = [] as UsecaseError[]
-    if (!emailValidator.validate(user.email)) {
-      errors.push({ fieldName: errorsTypes.EmailError, message: 'Email inválido' })
-    }
-    if (user.password.length < 6 || user.password.length > 100) {
-      errors.push({ fieldName: errorsTypes.PasswordError, message: 'Senha deve ter 6 e 100 caracteres' })
-    }
-    return errors
+export const validate: Validation = (form: LoginFormData): LoginFormData => {
+  const errors = {} as LoginFormData
+  if (!emailValidator.validate(form.email)) {
+    errors.email = 'Email inválido'
   }
+  if (form.password.length < 6 || form.password.length > 100) {
+    errors.password = 'Senha deve ter 6 e 100 caracteres'
+  }
+  return errors
 }

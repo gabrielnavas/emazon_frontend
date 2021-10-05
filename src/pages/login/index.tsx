@@ -1,6 +1,7 @@
-import { useCallback, useState } from 'react'
+import { useState } from 'react'
 import Link from 'next/link'
 import Router from 'next/router'
+import { useFormik } from 'formik'
 
 import { getRegisterPath, getShopPath } from '../../config/routesPath'
 
@@ -28,63 +29,54 @@ import {
 
 import { IconInfoForm } from '../../icons'
 
-import {
-  loginUseCaseFactory,
-  UsecaseError,
-  errorsTypes
-} from '../../usecase/login'
+import { loginHttpRequest } from '../../usecase/login/HttpRequest'
+import { validate } from '../../usecase/login/Validation'
+import * as AuthenticationManager from '../../usecase/authentication/Usecase'
+
 import { PRIMARY_PAGE_SHOP } from '../../components/pages/shop/Navigation'
 
-type FormInfoState = {
-  isError?: boolean
-  message?: string
+export type LoginFormData = {
+  email: string
+  password: string
 }
 
-const initFormInfoState = () => ({ isError: false, message: '' }) as FormInfoState
+const EMAIL_OR_PASSWORD_NOT_FOUND = 404
+const TOKEN_CREATED = 201
 
 const LoginPage = () => {
-  const [email, setEmail] = useState('')
-  const [emailMsg, setEmailMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [password, setPassword] = useState('')
-  const [passwordMsg, setPasswordMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [globalErrors, setGlobalErrors] = useState<FormInfoState[]>([])
-
+  const [globalErrors, setGlobalErrors] = useState('')
   const [isLoadingForm, setIsLoadingForm] = useState(false)
 
-  const loginUsecase = loginUseCaseFactory()
-
-  const handleButtonFinish = useCallback(() => {
-    (async () => {
+  const formik = useFormik({
+    initialValues: {
+      email: '',
+      password: ''
+    } as LoginFormData,
+    validate,
+    onSubmit: async () => {
       setIsLoadingForm(true)
-      const payloadForm = {
-        email, password
-      }
-      const errors = await loginUsecase.handle(payloadForm)
-      setIsLoadingForm(false)
-      if (errors.length > 0) {
-        return setErrorsFromValidation(errors)
-      }
-      Router.push(getShopPath(PRIMARY_PAGE_SHOP.toString()))
-    })()
-  }, [isLoadingForm, email, password, loginUsecase.handle])
+      const payloadForm = { ...formik.values } as LoginFormData
 
-  const setErrorsFromValidation = useCallback((results: UsecaseError[]) => {
-    const errors = {
-      [errorsTypes.EmailError]: setEmailMsg,
-      [errorsTypes.PasswordError]: setPasswordMsg
+      const result = await loginHttpRequest(payloadForm)
+      setIsLoadingForm(false)
+
+      if (result.statusCode === EMAIL_OR_PASSWORD_NOT_FOUND) {
+        return setGlobalErrors('Email/senha incorretos')
+      }
+
+      if (result.statusCode === TOKEN_CREATED) {
+        AuthenticationManager.set({
+          token: result.data.token,
+          user: {
+            email: result.data.user.email,
+            fullName: result.data.user.fullName
+          },
+          store: result.data.store
+        })
+        Router.push(getShopPath(PRIMARY_PAGE_SHOP.toString()))
+      }
     }
-    results.forEach(result => {
-      const useStateGetted = errors[result.fieldName]
-      if (useStateGetted) {
-        useStateGetted({ isError: true, message: result.message })
-      }
-      if (result.fieldName === errorsTypes.GlobalError) {
-        setGlobalErrors([{ isError: true, message: result.message }])
-      }
-    })
-  }, [errorsTypes])
+  })
 
   return (
     <Container>
@@ -98,39 +90,51 @@ const LoginPage = () => {
           <Title>Fazer login</Title>
           <FormGroup>
             <Label>Email</Label>
-            <InputText isError={emailMsg.isError} value={email} onChange={e => setEmail(e.target.value)} />
+            <InputText
+              id='email'
+              name='email'
+              type='email'
+              isError={formik.errors.email}
+              value={formik.values.email}
+              onChange={formik.handleChange} />
             {
-              emailMsg.message.length > 0 &&
-                <FormInfo isError={emailMsg.isError}>
+              formik.errors.email &&
+                <FormInfo isError={formik.errors.email}>
                   <IconInfoForm />
-                  {emailMsg.message}
+                  {formik.errors.email}
                 </FormInfo>
             }
           </FormGroup>
           <FormGroup>
             <Label>Senha</Label>
-            <InputText isError={passwordMsg.isError} type='password' value={password} onChange={e => setPassword(e.target.value)} />
+            <InputText
+              id='password'
+              name='password'
+              type='password'
+              isError={formik.errors.password}
+              value={formik.values.password}
+              onChange={formik.handleChange} />
             {
-              passwordMsg.message.length > 0 &&
-                <FormInfo isError={passwordMsg.isError}>
+              formik.errors.password &&
+                <FormInfo isError={formik.errors.password}>
                   <IconInfoForm />
-                  {passwordMsg.message}
+                  {formik.errors.password}
                 </FormInfo>
             }
             <GlobalErrors>
             {
-              globalErrors.map((error, index) => (
-                  <FormInfo key={index} isError={error.isError}>
+              globalErrors && (
+                <FormInfo>
                     <IconInfoForm />
-                    {error.message}
+                    {globalErrors}
                   </FormInfo>
-              ))
+              )
             }
           </GlobalErrors>
           </FormGroup>
           <ButtonFinish
             disabled={isLoadingForm}
-            onClick={e => { e.preventDefault(); handleButtonFinish() }}>
+            onClick={e => { e.preventDefault(); formik.handleSubmit() }}>
             {isLoadingForm ? 'Aguarde' : 'Logar'}
           </ButtonFinish>
         </Form>

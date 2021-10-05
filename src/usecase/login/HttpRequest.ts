@@ -1,7 +1,7 @@
 import { makeEndpointAPI } from '../../config/api'
-import { User } from './Entity'
+import { LoginFormData } from '../../pages/login'
 
-type HttpResponse = {
+type LoginHttpResponse = {
   statusCode: number
   data?: {
     token: string,
@@ -13,22 +13,19 @@ type HttpResponse = {
       fantasyName: string
     }
   },
-  errors: string[]
 }
+export type LoginHttpRequest = (loginForm: LoginFormData) => Promise<LoginHttpResponse>
 
-export class HttpRequest {
-  private readonly urlPost: string
-  constructor () {
+export const loginHttpRequest: LoginHttpRequest =
+  async (loginForm: LoginFormData): Promise<LoginHttpResponse> => {
     const loginSlug = 'login'
-    this.urlPost = makeEndpointAPI(loginSlug)
-  }
+    const urlPost = makeEndpointAPI(loginSlug)
 
-  handle = async (user: User): Promise<HttpResponse> => {
     const payload = {
-      email: user.email,
-      password: user.password
+      email: loginForm.email,
+      password: loginForm.password
     }
-    const response = await fetch(this.urlPost, {
+    const response = await fetch(urlPost, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -49,13 +46,10 @@ export class HttpRequest {
           store: data.store && {
             fantasyName: data.store.fantasy_name
           }
-        },
-        errors: []
+        }
       }
     }
     return {
-      statusCode: response.status,
-      errors: [data.detail]
+      statusCode: response.status
     }
   }
-}

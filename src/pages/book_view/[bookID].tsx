@@ -1,15 +1,15 @@
 import Image from 'next/image'
 
 import Header from '../../components/Header'
-import { makeEndpointAPI } from '../../config/api'
 
 import {
   IconStarFill,
   IconStarHalf,
   IconStarEmpty
 } from '../../icons'
+import { getBookUseCaseFactory } from '../../usecase/shop/book_view'
+import { Book } from '../../usecase/shop/book_view/Entity'
 import * as date from '../../utils/date'
-import { Book } from '../shop/[page]'
 
 import {
   Container,
@@ -98,17 +98,9 @@ const BookViewPage = ({ book }: Props) => {
 }
 
 export async function getStaticPaths () {
-  const response = await fetch(makeEndpointAPI('shop/books/get_ids'), {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    }
-  })
-
-  const data = await response.json()
-  const params = data.books.map(id => ({ params: { bookID: `${id}` } }))
-
+  const getBookUsecase = getBookUseCaseFactory()
+  const result = await getBookUsecase.getBookIDs()
+  const params = result.booksID.map(id => ({ params: { bookID: `${id}` } }))
   return {
     paths: [...params],
     fallback: false
@@ -117,30 +109,10 @@ export async function getStaticPaths () {
 
 export async function getStaticProps (context) {
   const { bookID } = context.params
-
-  const response = await fetch(makeEndpointAPI(`shop/book/${bookID}`), {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
-    }
-  })
-
-  const data = await response.json()
-  // eslint-disable-next-line camelcase
-  const { pages_amount, type_cover, published_at, publishing_company, ...rest } = data.book
-  const bookFixCamelCase = {
-    ...rest,
-    pagesAmount: data.book.pages_amount,
-    typeCover: {
-      typeName: data.book.type_cover.type_name
-    },
-    publishedAt: data.book.published_at,
-    publishingCompany: data.book.publishing_company
-  }
-
+  const getBookUsecase = getBookUseCaseFactory()
+  const book = await getBookUsecase.getBook(bookID)
   return {
-    props: { book: bookFixCamelCase }
+    props: { book }
   }
 }
 

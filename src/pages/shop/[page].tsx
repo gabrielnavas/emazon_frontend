@@ -1,44 +1,21 @@
 import { GetStaticPaths, GetStaticProps } from 'next'
+import { useRouter } from 'next/router'
 
 import Header from '../../components/Header'
 import Item from '../../components/pages/shop/BookItem'
 import Navigation from '../../components/pages/shop/Navigation'
 
+import { Book } from '../../usecase/shop/show_shop/Entity'
+import { ShowShopUsecaseFactory } from '../../usecase/shop/show_shop'
+
 import {
   Container,
-  BookList
+  BookList,
+  MessageDontHaveBooks
 } from './styles'
-import { makeEndpointAPI } from '../../config/api'
-import { useRouter } from 'next/router'
 
-export type Book = {
-  id: number
-  title: string
-  price: number
-  discount: number
-  description: string
-  pagesAmount: number
-  heigh: number,
-  width: number,
-  thickness: number,
-  publishedAt: Date,
-  publishingCompany: {
-    name: string
-  },
-  author: {
-      name: string
-  },
-  typeCover: {
-      typeName: string
-  },
-  language: {
-      code: string
-      name: string
-  },
-  category: {
-      name: string
-  }
-}
+const DONT_HAVE_BOOKS = 0
+const SHOP_EMPTY = '-1'
 
 type Props = {
   books: Book[],
@@ -47,7 +24,7 @@ type Props = {
 
 const ShopPage = ({ books, limitPage }: Props) => {
   const router = useRouter()
-  const { page } = router.query
+  const page = Number(router.query.page)
 
   return (
     <Container>
@@ -55,23 +32,29 @@ const ShopPage = ({ books, limitPage }: Props) => {
       <BookList>
         { books.map((book, index) => <Item key={index} book={book} />) }
       </BookList>
-      <Navigation currectPage={Number(page)} limit={limitPage} />
+      {
+        page === DONT_HAVE_BOOKS
+          ? <MessageDontHaveBooks>Não existem livros a venda ainda</MessageDontHaveBooks>
+          : <Navigation currectPage={page} limit={limitPage} />
+      }
     </Container>
   )
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const response = await fetch(makeEndpointAPI('shop/book/?is_paginator_id=true&limit=0&book_per_page=10'), {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
+  const showShopUsecase = ShowShopUsecaseFactory()
+  const { rangePages } = await showShopUsecase.getLimitePage()
+
+  if (rangePages.length === DONT_HAVE_BOOKS) {
+    const params = [({ params: { page: SHOP_EMPTY } })]
+    return {
+      paths: params,
+      fallback: false
     }
-  })
-
-  const data = await response.json()
-  const params = data.paginate_books.map((_, index) => ({ params: { page: `${index}` } }))
-
+  }
+  const params = rangePages.map((page: number) =>
+    ({ params: { page: `${page}` } })
+  )
   return {
     paths: params,
     fallback: false
@@ -79,36 +62,21 @@ export const getStaticPaths: GetStaticPaths = async () => {
 }
 
 export const getStaticProps: GetStaticProps = async context => {
-  const { page } = context.params
-
-  const response = await fetch(makeEndpointAPI(`shop/book?is_paginator_id=true&limit=0&book_per_page=10&page=${page}`), {
-    method: 'GET',
-    headers: {
-      Accept: 'application/json',
-      'Content-Type': 'application/json'
+  const page = Number(context.params.page)
+  const showShopUsecase = ShowShopUsecaseFactory()
+  const { books, limitPage } = await showShopUsecase.getBooksPaginate(page)
+  if (books.length === DONT_HAVE_BOOKS) {
+    return {
+      props: {
+        books: [],
+        limitPage: DONT_HAVE_BOOKS
+      }
     }
-  })
-  const data = await response.json()
-
-  const fixCamelCase = data.books.map(book => {
-    // eslint-disable-next-line camelcase
-    const { pages_amount, type_cover, published_at, publishing_company, ...rest } = book
-    const bookFixCamelCase = {
-      ...rest,
-      pagesAmount: book.pages_amount,
-      typeCover: {
-        typeName: book.type_cover.type_name
-      },
-      publishedAt: book.published_at,
-      publishingCompany: book.publishing_company
-    }
-    return bookFixCamelCase
-  })
-
+  }
   return {
     props: {
-      books: fixCamelCase,
-      limitPage: data.limit_page
+      books,
+      limitPage
     }
   }
 }

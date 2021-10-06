@@ -1,28 +1,19 @@
+import { OpenStoreFormData } from '../../pages/store/open'
 import { validateCnpj, validateCpf } from '../../utils/validate/brasil'
-import { UsecaseError, Store } from './Entity'
 
-export const errorsTypes = {
-  GlobalError: 'globalFormError',
-  fantasyNameError: 'fantasy_name',
-  cnpjError: 'cnpj',
-  cpfError: 'cpf'
-}
+type Validation = (openStore: OpenStoreFormData) => OpenStoreFormData
 
-export class Validation {
-  handle = (store: Store) => {
-    const errors = [] as UsecaseError[]
-    if (store.fantasyName.length <= 1 || store.fantasyName.length > 100) {
-      errors.push({ fieldName: errorsTypes.fantasyNameError, message: 'Nome fantasia deve ter entre 2 e 100 caracteres' })
+export const validate: Validation =
+  (openStore: OpenStoreFormData): OpenStoreFormData => {
+    const errors = {} as OpenStoreFormData
+    if (openStore.fantasyName.length <= 1 || openStore.fantasyName.length > 100) {
+      errors.fantasyName = 'Nome fantasia deve ter entre 2 e 100 caracteres'
     }
-    if (store.cpf && !validateCpf(store.cpf)) {
-      errors.push({ fieldName: errorsTypes.cpfError, message: 'CPF inválido' })
+    if (openStore.cpf && !validateCpf(openStore.cpf)) {
+      errors.cpf = 'CPF inválido'
     }
-    if (store.cnpj && !validateCnpj(store.cnpj)) {
-      errors.push({
-        fieldName: errorsTypes.cnpjError,
-        message: 'CNPJ inválido'
-      })
+    if (openStore.cnpj && !validateCnpj(openStore.cnpj)) {
+      errors.cnpj = 'CNPJ inválido'
     }
     return errors
   }
-}

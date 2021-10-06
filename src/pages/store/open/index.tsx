@@ -1,17 +1,14 @@
-import { useCallback, useEffect, useState } from 'react'
-import Link from 'next/link'
+import { useEffect, useState } from 'react'
 import Router from 'next/router'
+import Link from 'next/link'
+import { useFormik } from 'formik'
 
 import { getAccountConfigsPath, getLoginPath, getManagerStorePath } from '../../../config/routesPath'
 
-import {
-  errorsTypes,
-  UsecaseError,
-  openStoreUseCaseFactory
-}
-  from '../../../usecase/open_store'
-import { get as getAuthData } from '../../../usecase/authentication/Usecase'
-import * as authenticatorUsecase from '../../../usecase/authentication/Usecase'
+import { validate } from '../../../usecase/open_store/Validation'
+import { openStoreHttpRequest } from '../../../usecase/open_store/HttpRequest'
+
+import * as AuthManager from '../../../usecase/authentication/Usecase'
 
 import Header from '../../../components/Header'
 
@@ -37,105 +34,54 @@ import {
 } from './styles'
 
 import { IconInfoForm } from '../../../icons'
+import { formatCpfCnpj } from '../../../usecase/open_store/FormatFields'
+import { updateUserLocalStorage } from '../../../usecase/open_store/LocalStorage'
 
-type FormInfoState = {
-  isError?: boolean
-  message?: string
+export type CpfOrCnpjType = 'cpf' | 'cnpj'
+
+export type OpenStoreFormData = {
+  fantasyName: string
+  cpf?: string
+  cnpj?: string
+  toggleCpfCnpj: CpfOrCnpjType
 }
 
-type toggleCpfOrCnpj = 'cpf' | 'cnpj'
-
-const mask = (str: string, type: toggleCpfOrCnpj) => {
-  str = str.replace(/\D/g, '')
-  if (type === 'cpf') {
-    str = str.replace(/(\d{3})(\d)/, '$1.$2')
-    str = str.replace(/(\d{3})(\d)/, '$1.$2')
-    str = str.replace(/(\d{3})(\d{1,2})$/, '$1-$2')
-  } else if (type === 'cnpj') {
-    str = str.replace(/^(\d{2})(\d)/, '$1.$2')
-    str = str.replace(/^(\d{2})\.(\d{3})(\d)/, '$1.$2.$3')
-    str = str.replace(/\.(\d{3})(\d)/, '.$1/$2')
-    str = str.replace(/(\d{4})(\d)/, '$1-$2')
-  }
-  return str
-}
-
-const initFormInfoState = () => ({ isError: false, message: '' }) as FormInfoState
-
-const RegisterPage = () => {
-  const [fantasyName, setFantasyName] = useState('')
-  const [fantasyNameMsg, setFantasyNameMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [toggleCpfOrCnpj, setToggleCpfOrCnpj] = useState<toggleCpfOrCnpj>('cpf')
-  const [cpf, setCpf] = useState('')
-  const [cpfMsg, setCpfMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [cnpj, setCnpj] = useState('')
-  const [cnpjMsg, setCnpjMsg] = useState<FormInfoState>(initFormInfoState())
-
-  const [globalErrors, setGlobalErrors] = useState<FormInfoState[]>([])
-
+const OpenStorePage = () => {
   const [isLoadingForm, setIsLoadingForm] = useState(false)
-
-  const openStoreUsecase = openStoreUseCaseFactory()
+  const [globalError, setGlobalError] = useState('')
 
   useEffect(() => {
-    if (!authenticatorUsecase.isLogged()) {
+    if (!AuthManager.isLogged()) {
       Router.replace(getLoginPath())
     }
-    if (authenticatorUsecase.hasStore()) {
+    if (AuthManager.hasStore()) {
       Router.replace(getAccountConfigsPath())
     }
-  }, [authenticatorUsecase.isLogged, authenticatorUsecase.hasStore])
+  }, [AuthManager.isLogged, AuthManager.hasStore])
 
-  const handleChangeCpf = useCallback((str: string) => {
-    str = str.replace(/\D/g, '')
-    if (str.length <= 11) {
-      setCpf(mask(str, 'cpf'))
-    }
-  }, [cpf, setCpf, mask])
-
-  const handleChangeCnpj = useCallback((str: string) => {
-    str = str.replace(/\D/g, '')
-    if (str.length <= 14) {
-      setCnpj(mask(str, 'cnpj'))
-    }
-  }, [cnpj, setCnpj, mask])
-
-  const handleButtonFinish = useCallback(() => {
-    (async () => {
-      const authData = getAuthData()
+  const formik = useFormik({
+    initialValues: {
+      fantasyName: '',
+      cpf: '',
+      cnpj: '',
+      toggleCpfCnpj: 'cpf'
+    } as OpenStoreFormData,
+    validate,
+    onSubmit: async () => {
       setIsLoadingForm(true)
-      const payloadForm = {
-        fantasyName,
-        cpf: toggleCpfOrCnpj === 'cpf' ? cpf : undefined,
-        cnpj: toggleCpfOrCnpj === 'cnpj' ? cnpj : undefined
-      }
-      const errors = await openStoreUsecase.handle(payloadForm, authData.token)
+      const payloadForm = { ...formik.values } as OpenStoreFormData
+      const token = AuthManager.get().token
+      const result = await openStoreHttpRequest(payloadForm, token)
       setIsLoadingForm(false)
-      if (errors.length > 0) {
-        return setErrorsFromValidation(errors)
+      if (result.error) {
+        return setGlobalError(result.error)
       }
+      updateUserLocalStorage({
+        fantasyName: result.data.fantasyName
+      })
       Router.push(getManagerStorePath())
-    })()
-  }, [isLoadingForm, fantasyName, cpf, cnpj, cnpjMsg, cpfMsg, getAuthData])
-
-  const setErrorsFromValidation = useCallback((results: UsecaseError[]) => {
-    const errors = {
-      [errorsTypes.fantasyNameError]: setFantasyNameMsg,
-      [errorsTypes.cpfError]: setCpfMsg,
-      [errorsTypes.cnpjError]: setCnpjMsg
     }
-    results.forEach(result => {
-      const useStateGetted = errors[result.fieldName]
-      if (useStateGetted) {
-        useStateGetted({ isError: true, message: result.message })
-      }
-      if (result.fieldName === errorsTypes.GlobalError) {
-        setGlobalErrors([{ isError: true, message: result.message }])
-      }
-    })
-  }, [errorsTypes])
+  })
 
   return (
     <Container>
@@ -145,50 +91,63 @@ const RegisterPage = () => {
           <Title>Abrir loja na plataforma</Title>
           <FormGroup>
             <Label>Nome fantasia</Label>
-            <InputText isError={fantasyNameMsg.isError} value={fantasyName} onChange={e => setFantasyName(e.target.value)} />
+            <InputText
+              id='fantasyName'
+              name='fantasyName'
+              type='text'
+              isError={formik.errors.fantasyName}
+              value={formik.values.fantasyName}
+              onChange={formik.handleChange} />
             {
-              fantasyNameMsg.message.length > 0 &&
-                <FormInfo isError={fantasyNameMsg.isError}>
+              formik.errors.fantasyName &&
+                <FormInfo isError={formik.errors.fantasyName}>
                   <IconInfoForm />
-                  {fantasyNameMsg.message}
+                  {formik.errors.fantasyName}
                 </FormInfo>
             }
           </FormGroup>
           <FormGroup>
           <CpfOrCnpj>
-            <select onChange={e => setToggleCpfOrCnpj(e.target.value as toggleCpfOrCnpj)}>
+            <select
+              id='toggleCpfCnpj'
+              name='toggleCpfCnpj'
+              onChange={formik.handleChange}>
               <option value="cpf">CPF</option>
               <option value="cnpj">CNPJ</option>
             </select>
             {
-              toggleCpfOrCnpj === 'cpf'
+              formik.values.toggleCpfCnpj === 'cpf'
                 ? <>
                   <CpfOrCnpjInput
-                    placeholder={'000.000.000-00' as toggleCpfOrCnpj}
-                    isError={cpfMsg.isError}
+                    id='cpf'
+                    name='cpf'
                     type='text'
-                    value={cpf}
-                    onChange={e => handleChangeCpf(e.target.value)} />
+                    placeholder='000.000.000-00'
+                    isError={formik.errors.cpf}
+                    value={formik.values.cpf}
+                    onChange={e => formatCpfCnpj(e, formik.handleChange, 'cpf')} />
                   {
-                    cpfMsg.message.length > 0 &&
-                      <FormInfo isError={cpfMsg.isError}>
+                    formik.errors.cpf &&
+                      <FormInfo isError={formik.errors.cpf}>
                         <IconInfoForm />
-                        {cpfMsg.message}
+                        {formik.errors.cpf}
                       </FormInfo>
                   }
                 </>
                 : <>
                   <CpfOrCnpjInput
-                    placeholder={'00.000.000/0000-00' as toggleCpfOrCnpj}
-                    isError={cnpjMsg.isError}
+                    id='cnpj'
+                    name='cnpj'
                     type='text'
-                    value={cnpj}
-                    onChange={e => handleChangeCnpj(e.target.value)} />
+                    placeholder='00.000.000/0000-00'
+                    isError={formik.errors.cnpj}
+                    value={formik.values.cnpj}
+                    onChange={e => formatCpfCnpj(e, formik.handleChange, 'cnpj')} />
                   {
-                    cnpjMsg.message.length > 0 &&
-                      <FormInfo isError={cnpjMsg.isError}>
+                    formik.errors.cnpj &&
+                      <FormInfo isError={formik.errors.cnpj}>
                         <IconInfoForm />
-                        {cnpjMsg.message}
+                        {formik.errors.cnpj}
                       </FormInfo>
                   }
                   </>
@@ -198,18 +157,18 @@ const RegisterPage = () => {
           <FormGroup>
             <GlobalErrors>
               {
-                globalErrors.map((error, index) => (
-                    <FormInfo key={index} isError={error.isError}>
-                      <IconInfoForm />
-                      {error.message}
-                    </FormInfo>
-                ))
+                globalError && (
+                  <FormInfo >
+                    <IconInfoForm />
+                    {globalError}
+                  </FormInfo>
+                )
               }
             </GlobalErrors>
           </FormGroup>
           <ButtonFinish
             disabled={isLoadingForm}
-            onClick={e => { e.preventDefault(); handleButtonFinish() }}>
+            onClick={e => { e.preventDefault(); formik.handleSubmit() }}>
             {isLoadingForm ? 'Aguarde' : 'Abrir loja'}
           </ButtonFinish>
         </Form>
@@ -241,4 +200,4 @@ export async function getStaticProps (context) {
   }
 }
 
-export default RegisterPage
+export default OpenStorePage

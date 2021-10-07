@@ -18,3 +18,5 @@ export { MdSecurity as IconSecurity } from 'react-icons/md'
 export { FaRegAddressBook as IconAddress } from 'react-icons/fa'
 export { GiSellCard as IconSeller } from 'react-icons/gi'
 export { BiLogOut as IconLogOut } from 'react-icons/bi'
+
+export { IoMdAdd as IconAddImagem } from 'react-icons/io'

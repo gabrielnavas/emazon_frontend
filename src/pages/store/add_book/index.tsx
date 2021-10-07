@@ -1,5 +1,4 @@
 import { useCallback, useRef, useState } from 'react'
-import Image from 'next/image'
 
 import Header from '../../../components/Header'
 import Modal from 'react-modal'
@@ -29,7 +28,9 @@ import {
   NonSelected,
   ButtonFinish,
   Imgs,
-  ButtonAddImg
+  ButtonAddImg,
+  ImageBookContainer,
+  ImageBook
 } from './styles'
 
 export type AddBookFormData = {
@@ -106,6 +107,10 @@ const AddBookPage = () => {
     setModalSelectTypeCoverIsOpen(false)
   }, [typeCover, setTypeCover, setModalSelectTypeCoverIsOpen])
 
+  const handleRemovePhoto = useCallback((indexFromPhotos: number) => {
+    setImages(old => old.filter((_, index) => index !== indexFromPhotos))
+  }, [images, setImages])
+
   return (
     <Container>
       <Header />
@@ -115,18 +120,24 @@ const AddBookPage = () => {
           <Imgs>
           {
             images.map((image, i) =>
-                <Image key={i} src={image} width={200} height={150} />
+              <ImageBookContainer key={i}>
+                <ImageBook
+                  onClick={() => handleRemovePhoto(i)}
+                  src={image}
+                  width={183}
+                  height={268}
+                />
+              </ImageBookContainer>
             )
           }
           {
-            images.length <= 4 &&
+            images.length <= 3 &&
               <ButtonAddImg onClick={onButtonClick}>
                 <input type='file' id='file' multiple ref={inputFile} onChange={onChangeFile} style={{ display: 'none' }}/>
                   <IconAddImagem />
               </ButtonAddImg>
           }
           </Imgs>
-
         </Left>
 
         <Middle>

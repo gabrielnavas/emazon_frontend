@@ -1,4 +1,5 @@
 import styled from 'styled-components'
+import Image from 'next/image'
 
 export const Container = styled.div`
   display: flex;
@@ -17,8 +18,9 @@ export const Left = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 260px;
-  margin-right: 80px;
+  width: 500px;
+  margin-right: 30px;
+  max-height: 550px;
 `
 
 export const Middle = styled.div`
@@ -297,15 +299,15 @@ export const ButtonFinish = styled.button`
 
 export const Imgs = styled.ul`
   display: flex;
-  flex-direction: column;
+  flex-wrap: wrap;
   width: 100%;
+  height: 100%;
 `
 
 export const ButtonAddImg = styled.button`
-  width: 200px;
-  height: 150px;
+  width: 183px;
+  height: 268px;
   background: #ddda;
-  border: 1px solid none;
   cursor: pointer;
   border: 1px solid  #0000;
 
@@ -319,3 +321,17 @@ export const ButtonAddImg = styled.button`
     background: #2221;
   }
 `
+
+export const ImageBookContainer = styled.li`
+  margin: 0 5px 5px 0;
+  border: 1px solid  #0000;
+  cursor: pointer;
+
+  &:hover {
+    color: ${props => props.theme.default.colors.gold};
+    border: 1px solid  ${props => props.theme.default.colors.gold};
+    background: #2221;
+  }
+`
+
+export const ImageBook = styled(Image)``

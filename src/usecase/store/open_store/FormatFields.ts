@@ -1,4 +1,4 @@
-import { CpfOrCnpjType } from '../../pages/store/open'
+import { CpfOrCnpjType } from '../../../pages/store/open'
 
 const mask = (cpfOrCnpj: string, type: CpfOrCnpjType) => {
   let newStr = cpfOrCnpj.split('').join('')

@@ -5,8 +5,8 @@ import { useFormik } from 'formik'
 
 import { getAccountConfigsPath, getLoginPath, getManagerStorePath } from '../../../config/routesPath'
 
-import { validate } from '../../../usecase/open_store/Validation'
-import { openStoreHttpRequest } from '../../../usecase/open_store/HttpRequest'
+import { validate } from '../../../usecase/store/open_store/Validation'
+import { openStoreHttpRequest } from '../../../usecase/store/open_store/HttpRequest'
 
 import * as AuthManager from '../../../usecase/authentication/Usecase'
 
@@ -34,8 +34,8 @@ import {
 } from './styles'
 
 import { IconInfoForm } from '../../../icons'
-import { formatCpfCnpj } from '../../../usecase/open_store/FormatFields'
-import { updateUserLocalStorage } from '../../../usecase/open_store/LocalStorage'
+import { formatCpfCnpj } from '../../../usecase/store/open_store/FormatFields'
+import { updateUserLocalStorage } from '../../../usecase/store/open_store/LocalStorage'
 
 export type CpfOrCnpjType = 'cpf' | 'cnpj'
 

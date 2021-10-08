@@ -1,4 +1,4 @@
-import * as AuthManager from '../authentication/Usecase'
+import * as AuthManager from '../../authentication/Usecase'
 
 type StoreUpdate = {
   fantasyName: string

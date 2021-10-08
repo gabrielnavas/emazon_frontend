@@ -1,5 +1,5 @@
-import { makeEndpointAPI } from '../../config/api'
-import { OpenStoreFormData } from '../../pages/store/open'
+import { makeEndpointAPI } from '../../../config/api'
+import { OpenStoreFormData } from '../../../pages/store/open'
 
 type OpenStoreHttpResponse = {
   error: string
@@ -56,7 +56,6 @@ export const openStoreHttpRequest =
         }
       }
     }
-    console.log(response.status, data)
 
     return {
       error: 'server error'

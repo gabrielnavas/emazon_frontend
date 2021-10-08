@@ -1,5 +1,5 @@
-import { OpenStoreFormData } from '../../pages/store/open'
-import { validateCnpj, validateCpf } from '../../utils/validate/brasil'
+import { OpenStoreFormData } from '../../../pages/store/open'
+import { validateCnpj, validateCpf } from '../../../utils/validate/brasil'
 
 type Validation = (openStore: OpenStoreFormData) => OpenStoreFormData
 

@@ -18,9 +18,10 @@ export const Left = styled.div`
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 500px;
+  width: 460px;
   margin-right: 30px;
-  max-height: 550px;
+  max-height: 600px;
+  border: 1px solid #ddd;
 `
 
 export const Middle = styled.div`
@@ -46,6 +47,7 @@ export const Title = styled.span`
   padding-left: 2px;
   padding-bottom: 2px;
   margin-top: 5px;
+  margin-right: 10px;
   font-weight: 600;
   font-size: 18px;
   color: #111;
@@ -323,15 +325,40 @@ export const ButtonAddImg = styled.button`
 `
 
 export const ImageBookContainer = styled.li`
-  margin: 0 5px 5px 0;
   border: 1px solid  #0000;
   cursor: pointer;
-
-  &:hover {
-    color: ${props => props.theme.default.colors.gold};
-    border: 1px solid  ${props => props.theme.default.colors.gold};
-    background: #2221;
-  }
+  
+    &:hover {
+      border: 1px solid  ${props => props.theme.default.colors.gold};
+      background: #2221;
+    }
+    
 `
 
 export const ImageBook = styled(Image)``
+
+export const Error = styled.span`
+  color: ${props => props.theme.default.colors.textError};
+`
+
+export const ButtonSearchModal = styled.button`
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font: 800 15px/15px AEmb,Helvetica,Arial,sans-serif;
+  padding: 10px 40px;
+  margin: 50px 0;
+  font-size: 21px;
+  color: #232f3e;
+  background-color: #f90e;
+  border: 1px solid #f90e;
+  border-radius: 24px;
+  box-shadow: 0 0 16px rgb(0 0 0 / 20%);
+  cursor: pointer;
+
+
+  &:hover {
+    background-color: ${props => props.theme.default.colors.gold};
+    border: 1px solid ${props => props.theme.default.colors.yellow};
+  }
+`

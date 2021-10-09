@@ -6,6 +6,6 @@ export const getRegisterPath = () => '/register'
 
 export const getAccountConfigsPath = () => '/account_configs'
 
-export const getSalesManConfigsPath = () => '/store/initital'
+export const getOpenStoreInitital = () => '/store/open_initital'
 export const getOpenShopPath = () => '/store/open'
 export const getManagerStorePath = () => '/store/manager'

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import Router from 'next/router'
 
-import { getLoginPath, getSalesManConfigsPath } from '../../config/routesPath'
+import { getLoginPath, getManagerStorePath, getOpenStoreInitital } from '../../config/routesPath'
 
 import * as authenticatorUsecase from '../../usecase/authentication/Usecase'
 
@@ -24,11 +24,19 @@ import {
 } from '../../icons'
 
 const AccountConfigsPage = () => {
+  const [storePath, setStorePath] = useState('')
+
   useEffect(() => {
     if (!authenticatorUsecase.isLogged()) {
       Router.replace(getLoginPath())
     }
-  }, [authenticatorUsecase.isLogged])
+
+    if (authenticatorUsecase.hasStore()) {
+      setStorePath(getManagerStorePath())
+    } else {
+      setStorePath(getOpenStoreInitital())
+    }
+  }, [])
 
   const handleLogout = useCallback(() => {
     authenticatorUsecase.logOut()
@@ -60,7 +68,7 @@ const AccountConfigsPage = () => {
             description='Alterar, adicionar ou excluir algum endereço.'
           /> */}
           <Option
-            href={getSalesManConfigsPath()}
+            href={storePath}
             icon={<IconSeller />}
             title='Vendedor'
             description='Tornar-se vendedor na plataforma e gerenciar a loja.'

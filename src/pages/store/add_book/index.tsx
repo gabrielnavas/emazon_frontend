@@ -1,6 +1,6 @@
-import { useCallback, useRef, useState } from 'react'
-import Modal from 'react-modal'
+import { useCallback, useRef } from 'react'
 import { useFormik } from 'formik'
+import Router from 'next/router'
 
 import Header from '../../../components/Header'
 
@@ -8,23 +8,18 @@ import { IconAddImagem } from '../../../icons'
 
 import * as AuthenticationManager from '../../../usecase/authentication/Usecase'
 
-import { getAuthors } from '../../../usecase/store/add_book/get_authors/HttpRequest'
-import { validate as validateAuthorQuery } from '../../../usecase/store/add_book/get_authors/Validation'
+import ModalSelectAuthor from '../../../components/pages/store/add_book/ModalsSelectDependencies/ModalSelectAuthor'
+import ModalSelectLanguage from '../../../components/pages/store/add_book/ModalsSelectDependencies/ModalSelectLanguage'
+import ModalSelectCategory from '../../../components/pages/store/add_book/ModalsSelectDependencies/ModalSelectCategory'
+import ModalSelectTypeCover from '../../../components/pages/store/add_book/ModalsSelectDependencies/ModalSelectTypeCover'
+import ModalSelectPublishingCompany from '../../../components/pages/store/add_book/ModalsSelectDependencies/ModalSelectPublishingCompany'
 
-import { getLanguages } from '../../../usecase/store/add_book/get_languages/HttpRequest'
-import { validate as validateLanguageQuery } from '../../../usecase/store/add_book/get_languages/Validation'
-
-import { getCategories } from '../../../usecase/store/add_book/get_categories/HttpRequest'
-import { validate as validateCategoryQuery } from '../../../usecase/store/add_book/get_categories/Validation'
-
-import { getTypeCovers } from '../../../usecase/store/add_book/get_type_covers/HttpRequest'
-import { validate as validateTypeCoverQuery } from '../../../usecase/store/add_book/get_type_covers/Validation'
-
-import { getPublishingCompany } from '../../../usecase/store/add_book/get_publishing_company/HttpRequest'
-import { validate as validatePublishingCompany } from '../../../usecase/store/add_book/get_publishing_company/Validation'
-
-import { addBookHttpRequest } from '../../../usecase/store/add_book/HttpRequest'
-import { validate as validateBook } from '../../../usecase/store/add_book/Validation'
+import {
+  addBookHttpRequest
+} from '../../../usecase/store/add_book/post_add_books/HttpRequest'
+import {
+  validateFormBook
+} from '../../../usecase/store/add_book/post_add_books/Validation'
 
 import {
   Container,
@@ -41,54 +36,29 @@ import {
   Bar,
   Row,
   PublishedAt,
-  ButtonSelectForm,
-  Selected,
-  ModalContainer,
-  List,
-  ItemList,
-  NonSelected,
   ButtonFinish,
   Imgs,
   ButtonAddImg,
   ImageBookContainer,
   ImageBook,
-  Error as ErrorComponent,
-  ButtonSearchModal
+  DependenciesIDs,
+  Error as ErrorComponent
 } from './styles'
+import { addImagesHttpRequest } from '../../../usecase/store/add_book/post_add_images/HttpRequest'
+import { getManagerStorePath } from '../../../config/routesPath'
 
-export type Author = {
-  id: number
-  name: string
-}
-
-export type Language = {
-  id: string
-  code: string
-  name: string
-}
-
-export type Category = {
-  id: string
-  name: string
-}
-
-export type TypeCover = {
-  id: string
-  name: string
-}
-
-export type PublishingCompany = {
-  id: string
-  name: string
-}
-
-type BaseModalForm = {
-  queryInput: string,
-  isLoading: boolean,
+export type BaseModalForm = {
+  queryInput: string
+  isLoading: boolean
   modalIsOpen: boolean
 }
 
-export type BookData = {
+export type BookFormData = {
+  isLoading: boolean
+  globalError: string
+  dimensionsError: string
+  financeError: string
+
   title: string
   description: string
   price: number
@@ -97,47 +67,18 @@ export type BookData = {
   heigh: number
   width: number
   thickness: number
-  publishedAt: Date
+  publishedAt: string
   authorID: number
   typeCoverID: number
   languageID: number
   categoryID: number
   publishingCompanyID: number
-  storyID: number
+
+  imagesError: string,
+  images: any[]
 }
 
-export type AuthorModalForm ={
-  authorsFound: Author[],
-  authorSelected?: Author,
-} & BaseModalForm
-
-export type LanguageModalForm = {
-  languageFound: Language[],
-  languageSelected?: Language,
-} & BaseModalForm
-
-export type CategoryModalForm = {
-  categoriesFound: Category[],
-  categorySelected?: Category,
-} & BaseModalForm
-
-export type TypeCoverModalForm = {
-  typeCoversFound: TypeCover[],
-  typeCoverSelected?: TypeCover,
-} & BaseModalForm
-
-export type PublishingCompanyModalForm = {
-  publishingCompaniesFound: PublishingCompany[],
-  publishingCompanySelected?: PublishingCompany,
-} & BaseModalForm
-
-export type BookFormData = {
-  isLoading: boolean
-  globalError: string
-  bookData: BookData
-}
-
-const customStyles = {
+export const modalCustomStyles = {
   content: {
     top: '50%',
     left: '50%',
@@ -150,171 +91,89 @@ const customStyles = {
 }
 
 const AddBookPage = () => {
-  const [images, setImages] = useState<string[]>([])
   const inputFile = useRef(null)
-  const onButtonClick = () => {
-    inputFile.current.click()
-  }
-
-  const onChangeFile = (event) => {
-    event.stopPropagation()
-    event.preventDefault()
-    setImages(old => [URL.createObjectURL(event.target.files[0]), ...old])
-  }
-
-  const handleRemovePhoto = useCallback((indexFromPhotos: number) => {
-    setImages(old => old.filter((_, index) => index !== indexFromPhotos))
-  }, [images, setImages])
-
-  const formikAuthors = useFormik<AuthorModalForm>({
-    enableReinitialize: true,
-    initialValues: {
-      queryInput: '',
-      isLoading: false,
-      authorsFound: [],
-      authorSelected: undefined,
-      modalIsOpen: false
-    },
-    validate: validateAuthorQuery,
-    onSubmit: async () => {
-      formikAuthors.setValues(old => ({
-        ...old, isLoading: true
-      }))
-      const token = AuthenticationManager.get().token
-      const result = await getAuthors(formikAuthors.values.queryInput, token)
-      formikAuthors.setValues(old => ({
-        ...old,
-        isLoading: true,
-        authorsFound: result.data
-      }))
-    }
-  })
-
-  const formikLanguage = useFormik<LanguageModalForm>({
-    enableReinitialize: true,
-    initialValues: {
-      queryInput: '',
-      isLoading: false,
-      languageFound: [],
-      languageSelected: undefined,
-      modalIsOpen: false
-    },
-    validate: validateLanguageQuery,
-    onSubmit: async () => {
-      formikLanguage.setValues(old => ({
-        ...old, isLoading: true
-      }))
-      const token = AuthenticationManager.get().token
-      const result = await getLanguages(formikLanguage.values.queryInput, token)
-      formikLanguage.setValues(old => ({
-        ...old,
-        isLoading: true,
-        languageFound: result.data
-      }))
-    }
-  })
-
-  const formikCategory = useFormik<CategoryModalForm>({
-    enableReinitialize: true,
-    initialValues: {
-      queryInput: '',
-      isLoading: false,
-      categoriesFound: [],
-      categorySelected: undefined,
-      modalIsOpen: false
-    },
-    validate: validateCategoryQuery,
-    onSubmit: async () => {
-      formikCategory.setValues(old => ({
-        ...old, isLoading: true
-      }))
-      const token = AuthenticationManager.get().token
-      const result = await getCategories(formikCategory.values.queryInput, token)
-      formikCategory.setValues(old => ({
-        ...old,
-        isLoading: true,
-        categoriesFound: result.data
-      }))
-    }
-
-  })
-
-  const formikTypeCover = useFormik<TypeCoverModalForm>({
-    enableReinitialize: true,
-    initialValues: {
-      queryInput: '',
-      isLoading: false,
-      typeCoversFound: [],
-      typeCoverSelected: undefined,
-      modalIsOpen: false
-    },
-    validate: validateTypeCoverQuery,
-    onSubmit: async () => {
-      formikTypeCover.setValues(old => ({
-        ...old, isLoading: true
-      }))
-      const token = AuthenticationManager.get().token
-      const result = await getTypeCovers(formikTypeCover.values.queryInput, token)
-      formikTypeCover.setValues(old => ({
-        ...old,
-        isLoading: true,
-        typeCoversFound: result.data
-      }))
-      console.log(formikTypeCover.values)
-    }
-  })
-
-  const formikPublishingCompany = useFormik<PublishingCompanyModalForm>({
-    enableReinitialize: true,
-    initialValues: {
-      queryInput: '',
-      isLoading: false,
-      publishingCompaniesFound: [],
-      publishingCompanySelected: undefined,
-      modalIsOpen: false
-    },
-    validate: validatePublishingCompany,
-    onSubmit: async () => {
-      formikPublishingCompany.setValues(old => ({
-        ...old, isLoading: true
-      }))
-      const token = AuthenticationManager.get().token
-      const result = await getPublishingCompany(formikPublishingCompany.values.queryInput, token)
-      formikPublishingCompany.setValues(old => ({
-        ...old,
-        isLoading: true,
-        publishingCompaniesFound: result.data
-      }))
-      console.log(formikPublishingCompany.values)
-    }
-  })
 
   const formikBook = useFormik<BookFormData>({
     enableReinitialize: true,
     initialValues: {
       isLoading: false,
       globalError: '',
-      bookData: {} as BookData
+      dimensionsError: '',
+      financeError: '',
+
+      title: '',
+      description: '',
+      price: 0.00,
+      discount: 0.00,
+      pagesAmount: 0,
+      heigh: 0.00,
+      width: 0.00,
+      thickness: 0.00,
+      publishedAt: '2020-01-01',
+      authorID: 0,
+      typeCoverID: 0,
+      languageID: 0,
+      categoryID: 0,
+      publishingCompanyID: 0,
+
+      images: [],
+      imagesError: ''
     },
-    validate: validateBook,
+    validate: validateFormBook,
     onSubmit: async () => {
       formikBook.setValues(old => ({
         ...old, isLoading: true
       }))
       const token = AuthenticationManager.get().token
-      const result = await addBookHttpRequest(formikBook.values.bookData, token)
+      const result = await addBookHttpRequest(formikBook.values, token)
       formikBook.setValues(old => ({
         ...old,
-        isLoading: true
+        isLoading: false
       }))
       if (result.error) {
-        formikBook.setValues(old => ({
-          ...old,
-          globalErrors: result.error
-        }))
+        return formikBook.setErrors({
+          globalError: result.error
+        })
       }
+      formikBook.setValues(old => ({
+        ...old,
+        isLoading: false
+      }))
+      await addImagesHttpRequest(result.data.book.id, formikBook.values.images, token)
+      Router.push(getManagerStorePath())
     }
   })
+
+  const onButtonClick = useCallback(() => {
+    inputFile.current.click()
+  }, [])
+
+  const onChangeFile = useCallback((event) => {
+    const files = Array.from(event.target.files)
+    if (formikBook.values.images.length <= 4 &&
+      formikBook.values.images.length + files.length <= 4) {
+      const moreFilesURLs = files.map(file => URL.createObjectURL(file))
+      formikBook.setValues(old => ({
+        ...old,
+        images: [...moreFilesURLs, ...formikBook.values.images]
+      }))
+    } else {
+      formikBook.setErrors({
+        imagesError: 'São permitidos no máximo 4 fotos'
+      })
+    }
+  }, [formikBook.values.images])
+
+  const handleRemovePhoto = useCallback((indexFromPhotos: number) => {
+    const newImages = formikBook
+      .values
+      .images
+      .filter((_, index) => index !== indexFromPhotos)
+    formikBook.setValues(old => ({
+      ...old,
+      images: newImages
+    }))
+  }, [formikBook.values.images])
 
   return (
     <Container>
@@ -325,7 +184,7 @@ const AddBookPage = () => {
           <Title>Imagens do livro</Title>
           <Imgs>
           {
-            images.map((image, i) =>
+            formikBook.values.images.map((image, i) =>
               <ImageBookContainer key={i}>
                 <ImageBook
                   onClick={() => handleRemovePhoto(i)}
@@ -337,13 +196,19 @@ const AddBookPage = () => {
             )
           }
           {
-            images.length <= 3 &&
+            formikBook.values.images.length <= 3 &&
               <ButtonAddImg onClick={onButtonClick}>
                 <input type='file' id='file' multiple ref={inputFile} onChange={onChangeFile} style={{ display: 'none' }}/>
                   <IconAddImagem />
               </ButtonAddImg>
           }
           </Imgs>
+          <Row>
+          {
+            formikBook.errors.imagesError &&
+              <ErrorComponent>{formikBook.errors.imagesError}</ErrorComponent>
+          }
+          </Row>
         </Left>
 
         <Middle>
@@ -353,7 +218,13 @@ const AddBookPage = () => {
               id='title'
               name='title'
               type='text'
+              value={formikBook.values.title}
+              onChange={formikBook.handleChange}
             />
+            {
+              formikBook.touched.title && formikBook.errors.title &&
+                <ErrorComponent>{formikBook.errors.title}</ErrorComponent>
+            }
           </FormGroup>
           <FormGroup>
             <Label>Descrição</Label>
@@ -361,344 +232,147 @@ const AddBookPage = () => {
               id='description'
               name='description'
               type='text'
+              value={formikBook.values.description}
+              onChange={formikBook.handleChange}
             />
+            {
+              formikBook.touched.description && formikBook.errors.description &&
+                <ErrorComponent>{formikBook.errors.description}</ErrorComponent>
+            }
           </FormGroup>
 
+          <Title>Livro publicado em</Title>
+          <Bar />
           <Row>
             <FormGroup>
-              <Label>Páginas</Label>
-              <InputNumber
-                id='title'
-                name='title'
-                type='number'
-                step="0.01"
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label>Livro publicado em</Label>
               <PublishedAt
-                id='title'
-                name='title'
+                id='publishedAt'
+                name='publishedAt'
                 type='date'
+                value={formikBook.values.publishedAt}
+                onChange={formikBook.handleChange}
               />
+              {
+                formikBook.touched.publishedAt && formikBook.errors.publishedAt &&
+                  <ErrorComponent>{formikBook.errors.publishedAt}</ErrorComponent>
+              }
             </FormGroup>
           </Row>
 
+          <Title>Financeiro</Title>
+          <Bar />
+          <Row>
+            <FormGroup>
+              <Label>Preço</Label>
+              <InputNumber
+                id='price'
+                name='price'
+                type='number'
+                step="0.01"
+                value={formikBook.values.price}
+                onChange={formikBook.handleChange}
+              />
+            </FormGroup>
+            <FormGroup>
+              <Label>Desconto %</Label>
+              <PublishedAt
+                id='discount'
+                name='discount'
+                type='number'
+                step="0.01"
+                value={formikBook.values.discount}
+                onChange={formikBook.handleChange}
+              />
+            </FormGroup>
+          </Row>
+          <Row>
+          {
+            formikBook.touched.financeError && formikBook.errors.financeError &&
+              <ErrorComponent>{formikBook.errors.financeError}</ErrorComponent>
+          }
+          </Row>
           <Title>Dimensões</Title>
           <Bar />
           <Dimensions>
-            <FormGroup>
-              <Label>Largura</Label>
-              <InputNumber
-                id='description'
-                name='description'
-                type='number'
-                step="0.01"
-              />
-            </FormGroup>
-            <FormGroup>
-              <Label>Altura</Label>
-              <InputNumber
-                  id='description'
-                  name='description'
+            <Row>
+              <FormGroup>
+                <Label>Largura (cm)</Label>
+                <InputNumber
+                  id='width'
+                  name='width'
                   type='number'
                   step="0.01"
+                  value={formikBook.values.width}
+                  onChange={formikBook.handleChange}
                 />
-            </FormGroup>
-            <FormGroup>
-              <Label>Espessura</Label>
-              <InputNumber
-                id='description'
-                name='description'
-                type='number'
-                step="0.01"
-              />
-            </FormGroup>
+              </FormGroup>
+              <FormGroup>
+                <Label>Altura (cm)</Label>
+                <InputNumber
+                    id='heigh'
+                    name='heigh'
+                    type='number'
+                    step="0.01"
+                    value={formikBook.values.heigh}
+                    onChange={formikBook.handleChange}
+                  />
+              </FormGroup>
+              <FormGroup>
+                <Label>Espessura (cm)</Label>
+                <InputNumber
+                  id='thickness'
+                  name='thickness'
+                  type='number'
+                  step="0.01"
+                  value={formikBook.values.thickness}
+                  onChange={formikBook.handleChange}
+                />
+              </FormGroup>
+            </Row>
+            <Row>
+              <FormGroup>
+                <Label>Páginas</Label>
+                <InputNumber
+                  id='pagesAmount'
+                  name='pagesAmount'
+                  type='number'
+                  value={formikBook.values.pagesAmount}
+                  onChange={formikBook.handleChange}
+                />
+              </FormGroup>
+            </Row>
+            {
+              formikBook.touched.dimensionsError && formikBook.errors.dimensionsError &&
+                <ErrorComponent>{formikBook.errors.dimensionsError}</ErrorComponent>
+            }
           </Dimensions>
 
-          <FormGroup>
-              <Row>
-                <Title>Autor {formikAuthors.values.authorSelected
-                  ? <Selected>{formikAuthors.values.authorSelected.name}</Selected>
-                  : <NonSelected>não selecionado</NonSelected>}</Title>
-                <ButtonSelectForm
-                  onClick={() => formikAuthors.setValues(old => ({ ...old, modalIsOpen: true }))}>{
-                    formikAuthors.values.authorSelected ? 'Mudar' : 'Buscar'}
-                </ButtonSelectForm>
-              </Row>
-              <Bar />
-              <Modal
-                ariaHideApp={false}
-                isOpen={ formikAuthors.values.modalIsOpen}
-                onRequestClose={() => formikAuthors.setValues(old => ({ ...old, modalIsOpen: false }))}
-                style={customStyles} >
-                <ModalContainer>
-                  <FormGroup>
-                    <Label>Procurar por autores</Label>
-                    <InputText
-                      id='queryInput'
-                      name='queryInput'
-                      type='text'
-                      disabled={formikAuthors.values.isLoading}
-                      value={formikAuthors.values.queryInput}
-                      onChange={formikAuthors.handleChange}
-                      onKeyDown={e => e.key === 'Enter' ? formikAuthors.handleSubmit(e) : null }
-                    />
-                    <ErrorComponent>{formikAuthors.errors.queryInput}</ErrorComponent>
-                    <ButtonSearchModal
-                      type="button"
-                      onClick={formikAuthors.handleSubmit}>
-                        Buscar
-                    </ButtonSearchModal>
-                    <List>
-                      {
-                        formikAuthors.values.authorsFound
-                          .map(author =>
-                          <ItemList
-                            key={author.id}
-                            onClick={() => {
-                              formikAuthors.setValues(old =>
-                                ({ ...old, authorSelected: author, modalIsOpen: false }))
-                            } }>
-                              {author.name}
-                          </ItemList>
-                          )
-                      }
-                    </List>
-                  </FormGroup>
-                </ModalContainer>
-              </Modal>
-            </FormGroup>
-
-            <FormGroup>
-              <Row>
-                <Title>Idioma {formikLanguage.values.languageSelected
-                  ? <Selected>{formikLanguage.values.languageSelected.name}</Selected>
-                  : <NonSelected>não selecionado</NonSelected>}</Title>
-                <ButtonSelectForm
-                  onClick={() => formikLanguage.setValues(old => ({ ...old, modalIsOpen: true }))}>{
-                    formikLanguage.values.languageSelected ? 'Mudar' : 'Buscar'}
-                </ButtonSelectForm>
-              </Row>
-              <Bar />
-              <Modal
-                ariaHideApp={false}
-                isOpen={ formikLanguage.values.modalIsOpen}
-                onRequestClose={() => formikLanguage.setValues(old => ({ ...old, modalIsOpen: false }))}
-                style={customStyles} >
-                <ModalContainer>
-                  <FormGroup>
-                    <Label>Procurar por idiomas</Label>
-                    <InputText
-                      id='queryInput'
-                      name='queryInput'
-                      type='text'
-                      disabled={formikLanguage.values.isLoading}
-                      value={formikLanguage.values.queryInput}
-                      onChange={formikLanguage.handleChange}
-                      onKeyDown={e => e.key === 'Enter' ? formikLanguage.handleSubmit(e) : null }
-                    />
-                    <ErrorComponent>{formikLanguage.errors.queryInput}</ErrorComponent>
-                    <ButtonSearchModal
-                      type="button"
-                      onClick={formikLanguage.handleSubmit}>
-                        Buscar
-                    </ButtonSearchModal>
-                    <List>
-                      {
-                        formikLanguage.values.languageFound
-                          .map(language =>
-                          <ItemList
-                            key={language.id}
-                            onClick={() => {
-                              formikLanguage.setValues(old =>
-                                ({ ...old, languageSelected: language, modalIsOpen: false }))
-                            } }>
-                              {language.name}
-                          </ItemList>
-                          )
-                      }
-                    </List>
-                  </FormGroup>
-                </ModalContainer>
-              </Modal>
-            </FormGroup>
-
-            <FormGroup>
-              <Row>
-                <Title>Categoria {formikCategory.values.categorySelected
-                  ? <Selected>{formikCategory.values.categorySelected.name}</Selected>
-                  : <NonSelected>não selecionado</NonSelected>}</Title>
-                <ButtonSelectForm
-                  onClick={() => formikCategory.setValues(old => ({ ...old, modalIsOpen: true }))}>{
-                    formikCategory.values.categorySelected ? 'Mudar' : 'Buscar'}
-                </ButtonSelectForm>
-              </Row>
-              <Bar />
-              <Modal
-                ariaHideApp={false}
-                isOpen={ formikCategory.values.modalIsOpen}
-                onRequestClose={() => formikCategory.setValues(old => ({ ...old, modalIsOpen: false }))}
-                style={customStyles} >
-                <ModalContainer>
-                  <FormGroup>
-                    <Label>Procurar por categorias</Label>
-                    <InputText
-                      id='queryInput'
-                      name='queryInput'
-                      type='text'
-                      disabled={formikCategory.values.isLoading}
-                      value={formikCategory.values.queryInput}
-                      onChange={formikCategory.handleChange}
-                      onKeyDown={e => e.key === 'Enter' ? formikCategory.handleSubmit(e) : null }
-                    />
-                    <ErrorComponent>{formikCategory.errors.queryInput}</ErrorComponent>
-                    <ButtonSearchModal
-                      type="button"
-                      onClick={formikCategory.handleSubmit}>
-                        Buscar
-                    </ButtonSearchModal>
-                    <List>
-                      {
-                        formikCategory.values.categoriesFound
-                          .map(category =>
-                          <ItemList
-                            key={category.id}
-                            onClick={() => {
-                              formikCategory.setValues(old => ({
-                                ...old,
-                                categorySelected: category,
-                                modalIsOpen: false
-                              }))
-                            } }>
-                              {category.name}
-                          </ItemList>
-                          )
-                      }
-                    </List>
-                  </FormGroup>
-                </ModalContainer>
-              </Modal>
-            </FormGroup>
-
-            <FormGroup>
-              <Row>
-                <Title>Tipo capa {formikTypeCover.values.typeCoverSelected
-                  ? <Selected>{formikTypeCover.values.typeCoverSelected.name}</Selected>
-                  : <NonSelected>não selecionado</NonSelected>}</Title>
-                <ButtonSelectForm
-                  onClick={() => formikTypeCover.setValues(old => ({ ...old, modalIsOpen: true }))}>{
-                    formikTypeCover.values.typeCoverSelected ? 'Mudar' : 'Buscar'}
-                </ButtonSelectForm>
-              </Row>
-              <Bar />
-              <Modal
-                ariaHideApp={false}
-                isOpen={ formikTypeCover.values.modalIsOpen}
-                onRequestClose={() => formikTypeCover.setValues(old => ({ ...old, modalIsOpen: false }))}
-                style={customStyles} >
-                <ModalContainer>
-                  <FormGroup>
-                    <Label>Procurar por tipos de capa</Label>
-                    <InputText
-                      id='queryInput'
-                      name='queryInput'
-                      type='text'
-                      disabled={formikTypeCover.values.isLoading}
-                      value={formikTypeCover.values.queryInput}
-                      onChange={formikTypeCover.handleChange}
-                      onKeyDown={e => e.key === 'Enter' ? formikTypeCover.handleSubmit(e) : null }
-                    />
-                    <ErrorComponent>{formikTypeCover.errors.queryInput}</ErrorComponent>
-                    <ButtonSearchModal
-                      type="button"
-                      onClick={formikTypeCover.handleSubmit}>
-                        Buscar
-                    </ButtonSearchModal>
-                    <List>
-                      {
-                        formikTypeCover.values.typeCoversFound
-                          .map(typeCover =>
-                          <ItemList
-                            key={typeCover.id}
-                            onClick={() => {
-                              formikTypeCover.setValues(old => ({
-                                ...old,
-                                typeCoverSelected: typeCover,
-                                modalIsOpen: false
-                              }))
-                            } }>
-                              {typeCover.name}
-                          </ItemList>
-                          )
-                      }
-                    </List>
-                  </FormGroup>
-                </ModalContainer>
-              </Modal>
-            </FormGroup>
-
-            <FormGroup>
-              <Row>
-                <Title>Empresa Publicada {formikPublishingCompany.values.publishingCompanySelected
-                  ? <Selected>{formikPublishingCompany.values.publishingCompanySelected.name}</Selected>
-                  : <NonSelected>não selecionado</NonSelected>}</Title>
-                <ButtonSelectForm
-                  onClick={() => formikPublishingCompany.setValues(old => ({ ...old, modalIsOpen: true }))}>{
-                    formikPublishingCompany.values.publishingCompanySelected ? 'Mudar' : 'Buscar'}
-                </ButtonSelectForm>
-              </Row>
-              <Bar />
-              <Modal
-                ariaHideApp={false}
-                isOpen={ formikPublishingCompany.values.modalIsOpen}
-                onRequestClose={() => formikPublishingCompany.setValues(old => ({ ...old, modalIsOpen: false }))}
-                style={customStyles} >
-                <ModalContainer>
-                  <FormGroup>
-                    <Label>Procurar por tipos de capa</Label>
-                    <InputText
-                      id='queryInput'
-                      name='queryInput'
-                      type='text'
-                      disabled={formikPublishingCompany.values.isLoading}
-                      value={formikPublishingCompany.values.queryInput}
-                      onChange={formikPublishingCompany.handleChange}
-                      onKeyDown={e => e.key === 'Enter' ? formikPublishingCompany.handleSubmit(e) : null }
-                    />
-                    <ErrorComponent>{formikPublishingCompany.errors.queryInput}</ErrorComponent>
-                    <ButtonSearchModal
-                      type="button"
-                      onClick={formikPublishingCompany.handleSubmit}>
-                        Buscar
-                    </ButtonSearchModal>
-                    <List>
-                      {
-                        formikPublishingCompany.values.publishingCompaniesFound
-                          .map(publishingCompany =>
-                            <ItemList
-                              key={publishingCompany.id}
-                              onClick={() => {
-                                formikPublishingCompany.setValues(old => ({
-                                  ...old,
-                                  publishingCompanySelected: publishingCompany,
-                                  modalIsOpen: false
-                                }))
-                              } }>
-                                {publishingCompany.name}
-                            </ItemList>
-                          )
-                      }
-                    </List>
-                  </FormGroup>
-                </ModalContainer>
-              </Modal>
-            </FormGroup>
-            {
-              formikBook.values.globalError &&
-                <ErrorComponent>{formikBook.values.globalError}</ErrorComponent>
-            }
-            <ButtonFinish>Inserir livro</ButtonFinish>
+          <DependenciesIDs>
+            <ModalSelectAuthor
+              getAuthorIDSelected={(authorID: number) => formikBook.setValues(old => ({ ...old, authorID }))}
+            />
+            <ModalSelectLanguage
+              getLanguageIDSelected={(languageID: number) => formikBook.setValues(old => ({ ...old, languageID }))}
+            />
+            <ModalSelectCategory
+              getCategoryIDSelected={(categoryID: number) => formikBook.setValues(old => ({ ...old, categoryID }))}
+            />
+            <ModalSelectTypeCover
+              getTypeCoverIDSelected={(typeCoverID: number) => formikBook.setValues(old => ({ ...old, typeCoverID }))}
+            />
+            <ModalSelectPublishingCompany
+              getPublishingCompanyIDSelected={(publishingCompanyID: number) => formikBook.setValues(old => ({ ...old, publishingCompanyID }))}
+            />
+          </DependenciesIDs>
+          {
+            formikBook.errors.globalError &&
+              <ErrorComponent>{formikBook.errors.globalError}</ErrorComponent>
+          }
+          <ButtonFinish
+            type='submit'
+            onClick={formikBook.handleSubmit}>
+              Inserir livro
+          </ButtonFinish>
         </Middle>
       </Section>
     </Container>

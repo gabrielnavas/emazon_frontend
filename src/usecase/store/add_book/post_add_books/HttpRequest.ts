@@ -1,8 +1,13 @@
-import { makeEndpointAPI } from '../../../config/api'
-import { BookData } from '../../../pages/store/add_book'
+import { makeEndpointAPI } from '../../../../config/api'
+import { BookFormData } from '../../../../pages/store/add_book'
 
 type HttpResponse = {
-  error: string
+  error?: string
+  data?: {
+    book: {
+      id: number
+    }
+  }
 }
 
 const usecasesErrors = {
@@ -13,9 +18,10 @@ const errorWrapper = (error: string): string =>
   Object.values(usecasesErrors).find(errorUsecase => errorUsecase === error)
 
 export const addBookHttpRequest =
-  async (book: BookData, userToken: string): Promise<HttpResponse> => {
-    const registerSlug = 'open_store'
-    const urlPost = makeEndpointAPI(registerSlug)
+  async (book: BookFormData, userToken: string): Promise<HttpResponse> => {
+    const slug = 'book'
+    const urlPost = makeEndpointAPI(slug)
+    console.log(book)
 
     const payload = {
       title: book.title,
@@ -31,8 +37,7 @@ export const addBookHttpRequest =
       type_cover_id: book.typeCoverID,
       language_id: book.languageID,
       category_id: book.categoryID,
-      publishing_company_id: book.publishingCompanyID,
-      store_id: book.storyID
+      publishing_company_id: book.publishingCompanyID
     }
     const response = await fetch(urlPost, {
       method: 'POST',
@@ -49,14 +54,18 @@ export const addBookHttpRequest =
       const errorFound = errorWrapper(data.detail)
       if (errorFound) {
         return {
-          error: data.detail
+          error: errorFound
         }
       }
     }
 
     if (response.status === 201) {
       return {
-        error: data.detail
+        data: {
+          book: {
+            id: data.book.id
+          }
+        }
       }
     }
 

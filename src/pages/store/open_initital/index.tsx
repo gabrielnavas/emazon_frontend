@@ -3,8 +3,8 @@ import Router from 'next/router'
 import Link from 'next/link'
 
 import {
-  getAccountConfigsPath,
   getLoginPath,
+  getManagerStorePath,
   getOpenShopPath,
   getShopPath
 } from '../../../config/routesPath'
@@ -26,9 +26,9 @@ const InititalPage = () => {
       Router.replace(getLoginPath())
     }
     if (authenticatorUsecase.hasStore()) {
-      Router.replace(getAccountConfigsPath())
+      Router.replace(getManagerStorePath())
     }
-  }, [authenticatorUsecase.isLogged, authenticatorUsecase.hasStore])
+  }, [])
 
   return (
     <Container>
